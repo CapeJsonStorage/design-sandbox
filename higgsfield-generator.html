@@ -305,9 +305,9 @@ const MiniZip = {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Download .higgsfield.json
         </button>
-        <button class="btn-dl slate" id="btn-cli-dl" onclick="downloadCLI()" style="display:none">
+        <button class="btn-dl slate" id="btn-cli-dl" onclick="copyInjectScript()" style="display:none">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-          CLI Commands .txt
+          Copy Console Inject Script
         </button>
         <button class="btn-ghost" onclick="resetDoc()">Try another file</button>
       </div>
@@ -672,36 +672,117 @@ function renderDocBlocks(blocks) {
   document.getElementById('doc-results').style.display = 'flex';
 }
 
-// ── Build Higgsfield project JSON ─────────────────────────────────────────────
+// ── Build Higgsfield canvas JSON (exact format from live canvas analysis) ─────
+// Node types: generate (imagegen_2_0 | seedance_2_0), prompt, media, stickyNote
+// Edges: prompt.text→generate.prompt  media.image→generate.input_images
+//        generate(img).image→generate(vid).input_images
 function buildHighsfieldProject(blocks, projectName) {
-  return {
-    version: '1.0',
-    project: projectName || 'Higgsfield Project',
-    created_at: now(),
-    cli_install: 'npm install -g @higgsfield/cli',
-    cli_auth: 'higgsfield auth login',
-    tasks: blocks.map((b, i) => {
-      const iv = (b.type || '').toLowerCase() === 'video';
-      const refs = (b.refImages || []).map(ri => ri.dataUrl || ri.imgUrl).filter(Boolean);
-      const refUrls = (b.refImages || []).map(ri => ri.srcUrl).filter(Boolean);
-      return {
-        id: uid(),
-        label: `DESIGN ${i + 1}`,
-        type: iv ? 'video' : 'image',
-        prompt: b.description || '',
-        references: refs.length ? refs : refUrls,
-        reference_urls: refUrls,
-        model: 'auto',
-        settings: {
-          aspectRatio: '16:9',
-          quality: 'high',
-          resolution: iv ? '1080p' : '4K',
-          duration: iv ? 8 : null
+  const nodes = [], edges = [];
+  const COLS_GAP_X = 900;
+  const ROW_GAP_Y = 950;
+
+  blocks.forEach((block, i) => {
+    const iv = (block.type || '').toLowerCase() === 'video';
+    const prompt = block.description || '';
+    const refs = block.refImages || [];
+    const xBase = i * COLS_GAP_X;
+    const yBase = 0;
+
+    // ── Sticky note ───────────────────────────────────────────────────────────
+    const stickyId = uid();
+    const stickyText = [block.context, block.ref ? 'Ref: ' + block.ref : ''].filter(Boolean).join('\n\n');
+    nodes.push({
+      id: stickyId,
+      type: 'stickyNote',
+      position: { x: xBase, y: yBase - 280 },
+      data: {
+        text: stickyText || `DESIGN ${i + 1}`,
+        fontSize: 24,
+        color: '#fef3c7',
+        input_type: 'text',
+        input: { text: stickyText || `DESIGN ${i + 1}` }
+      },
+      style: { width: 300, height: 200 },
+      zIndex: 1, parentId: null,
+      width: 300, height: 200,
+      measured: { width: 300, height: 200 }
+    });
+
+    // ── Prompt node ───────────────────────────────────────────────────────────
+    const promptId = uid();
+    nodes.push({
+      id: promptId,
+      type: 'prompt',
+      position: { x: xBase, y: yBase },
+      data: { input_type: 'text', input: { text: prompt } },
+      style: { width: 296, height: 151 },
+      zIndex: 2, parentId: null,
+      width: 296, height: 151,
+      measured: { width: 296, height: 151 }
+    });
+
+    // ── Reference media nodes ─────────────────────────────────────────────────
+    const mediaIds = refs.map((ri, j) => {
+      const mediaId = uid();
+      const imgUrl = ri.dataUrl || ri.srcUrl || ri.imgUrl || '';
+      nodes.push({
+        id: mediaId,
+        type: 'media',
+        position: { x: xBase, y: yBase + 200 + j * 340 },
+        data: { mediaType: 'image', loading: false, url: imgUrl, previewUrl: imgUrl },
+        style: { width: 300, height: 300 },
+        zIndex: 2, parentId: null,
+        width: 300, height: 300,
+        measured: { width: 300, height: 300 }
+      });
+      return mediaId;
+    });
+
+    // ── Image generate node ───────────────────────────────────────────────────
+    const imgGenId = uid();
+    nodes.push({
+      id: imgGenId,
+      type: 'generate',
+      position: { x: xBase + 380, y: yBase },
+      data: {
+        generation_type: 'imagegen_2_0',
+        input: { text: prompt, aspect_ratio: '16:9', resolution: '2k', quality: 'high', batch_size: 1 }
+      },
+      style: { width: 300, height: 300 },
+      zIndex: 3, parentId: null,
+      width: 300, height: 300,
+      measured: { width: 300, height: 300 }
+    });
+
+    // prompt → image gen
+    edges.push({ id: uid(), source: promptId, sourceHandle: 'text', target: imgGenId, targetHandle: 'prompt' });
+    // media refs → image gen
+    mediaIds.forEach(mid => {
+      edges.push({ id: uid(), source: mid, sourceHandle: 'image', target: imgGenId, targetHandle: 'input_images' });
+    });
+
+    // ── Video generate node (only for video blocks) ───────────────────────────
+    if (iv) {
+      const vidGenId = uid();
+      nodes.push({
+        id: vidGenId,
+        type: 'generate',
+        position: { x: xBase + 760, y: yBase },
+        data: {
+          generation_type: 'seedance_2_0',
+          input: { text: prompt, duration: 8, resolution: '720p', aspect_ratio: '16:9', generate_audio: false, batch_size: 1 }
         },
-        note: b.context || ''
-      };
-    })
-  };
+        style: { width: 300, height: 300 },
+        zIndex: 4, parentId: null,
+        width: 300, height: 300,
+        measured: { width: 300, height: 300 }
+      });
+      // image gen → video gen (start frame)
+      edges.push({ id: uid(), source: imgGenId, sourceHandle: 'image', target: vidGenId, targetHandle: 'input_images' });
+    }
+  });
+
+  return { nodes, edges };
 }
 
 function downloadHighsfield(data, name) {
@@ -712,24 +793,66 @@ function downloadHighsfield(data, name) {
   a.click(); URL.revokeObjectURL(a.href);
 }
 
-function downloadCLI() {
+function copyInjectScript() {
   if (!docBlocks.length) return;
-  const lines = [`# Higgsfield CLI Commands — ${docFileName}`, `# Install: npm install -g @higgsfield/cli`, `# Auth:    higgsfield auth login`, ``];
-  docBlocks.forEach((b, i) => {
-    const iv = (b.type || '').toLowerCase() === 'video';
-    lines.push(`# DESIGN ${i + 1} — ${iv ? 'video' : 'image'}`);
-    const refArgs = (b.refImages || []).map(ri => {
-      const u = ri.srcUrl;
-      return u ? `  --reference "${u}"` : '';
-    }).filter(Boolean).join(' \\\n');
-    const cmd = `higgsfield generate ${iv ? 'video' : 'image'} \\\n  --prompt "${(b.description||'').replace(/"/g,'\\"')}"${refArgs ? ' \\\n' + refArgs : ''}${iv ? ' \\\n  --duration 8 \\\n  --resolution 1080p' : ' \\\n  --resolution 4K'} \\\n  --quality high`;
-    lines.push(cmd, ``);
+  const project = buildHighsfieldProject(docBlocks, docFileName);
+  const nodesJson = JSON.stringify(project.nodes, null, 2);
+  const edgesJson = JSON.stringify(project.edges, null, 2);
+
+  const script = `// Higgsfield Canvas Inject — ${docFileName}
+// Paste this into DevTools console while on a blank Higgsfield canvas.
+(function () {
+  const NODES = ${nodesJson};
+  const EDGES = ${edgesJson};
+
+  // Walk React Fiber tree looking for a node with the given prop
+  function findFiberWithProp(el, propName) {
+    const fiberKey = Object.keys(el).find(k => k.startsWith('__reactFiber') || k.startsWith('__reactInternalInstance'));
+    if (!fiberKey) return null;
+    function walk(fiber) {
+      if (!fiber) return null;
+      if (fiber.memoizedProps && typeof fiber.memoizedProps[propName] === 'function') return fiber;
+      return walk(fiber.child) || walk(fiber.sibling);
+    }
+    return walk(el[fiberKey]);
+  }
+
+  // Find the React Flow wrapper element
+  const rfEl = document.querySelector('.react-flow__renderer') ||
+               document.querySelector('[class*="react-flow__renderer"]') ||
+               document.querySelector('[class*="reactflow"]');
+  if (!rfEl) { console.error('[Higgsfield inject] React Flow element not found.'); return; }
+
+  const nodesChangeFiber = findFiberWithProp(rfEl, 'onNodesChange');
+  if (!nodesChangeFiber) { console.error('[Higgsfield inject] onNodesChange not found in React fiber tree.'); return; }
+
+  const { onNodesChange, onEdgesChange } = nodesChangeFiber.memoizedProps;
+
+  // Inject nodes
+  onNodesChange(NODES.map(n => ({ type: 'add', item: n })));
+
+  // Inject edges (after a brief tick so nodes are registered)
+  if (typeof onEdgesChange === 'function' && EDGES.length) {
+    setTimeout(() => {
+      onEdgesChange(EDGES.map(e => ({ type: 'add', item: e })));
+      console.log('[Higgsfield inject] Done — ' + EDGES.length + ' edges added.');
+    }, 120);
+  }
+
+  console.log('[Higgsfield inject] Done — ' + NODES.length + ' nodes injected from "${docFileName}".');
+})();`;
+
+  navigator.clipboard.writeText(script).then(() => {
+    const btn = document.getElementById('btn-cli-dl');
+    const orig = btn.innerHTML;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+    setTimeout(() => { btn.innerHTML = orig; }, 2000);
+  }).catch(() => {
+    // Fallback: open a new window with the script so user can copy manually
+    const w = window.open('', '_blank');
+    w.document.write('<pre style="font:13px monospace;padding:20px;white-space:pre-wrap">' + script.replace(/</g,'&lt;') + '</pre>');
+    w.document.title = 'Console Inject Script';
   });
-  const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = (docFileName || 'project') + '_cli_commands.txt';
-  a.click(); URL.revokeObjectURL(a.href);
 }
 
 // ── Node graph renderer ───────────────────────────────────────────────────────
