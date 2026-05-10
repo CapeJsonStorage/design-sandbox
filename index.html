@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Sandbox</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --nav-h: 56px;
+    --accent: #6366f1;
+    --bg: #f0f0f2;
+    --nav-bg: rgba(255,255,255,0.92);
+    --nav-border: #e2e2e6;
+    --tab-hover: #f4f4f8;
+    --tab-active-bg: #fff;
+    --tab-active-border: #6366f1;
+    --text: #111;
+    --text-muted: #888;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  /* ── Top nav ── */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: var(--nav-h);
+    background: var(--nav-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--nav-border);
+    display: flex; align-items: center;
+    padding: 0 20px; gap: 8px;
+  }
+
+  .nav-brand {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 15px; font-weight: 700; color: var(--text);
+    letter-spacing: -.3px; flex-shrink: 0; margin-right: 12px;
+    text-decoration: none;
+  }
+
+  .nav-brand-mark {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .nav-brand-mark svg { color: white; }
+
+  .nav-tabs {
+    display: flex; align-items: center; gap: 2px; flex: 1;
+  }
+
+  .nav-tab {
+    display: flex; align-items: center; gap: 7px;
+    padding: 7px 14px; border: none; background: transparent;
+    border-radius: 8px; font-size: 13px; font-weight: 500;
+    color: var(--text-muted); cursor: pointer;
+    transition: background .12s, color .12s;
+    white-space: nowrap;
+  }
+
+  .nav-tab svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  .nav-tab:hover {
+    background: var(--tab-hover); color: var(--text);
+  }
+
+  .nav-tab.active {
+    background: #eef2ff; color: #4338ca;
+    font-weight: 600;
+  }
+
+  .nav-tab.active.orange { background: #fff7ed; color: #c2410c; }
+  .nav-tab.active.green  { background: #f0fdf4; color: #15803d; }
+
+  .nav-right {
+    margin-left: auto; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  }
+
+  .nav-badge {
+    font-size: 10px; font-weight: 700; padding: 3px 9px;
+    border-radius: 20px; background: #eef2ff; color: #4338ca;
+    letter-spacing: .3px;
+  }
+
+  /* ── Iframe panels ── */
+  .panels {
+    position: fixed;
+    top: var(--nav-h); left: 0; right: 0; bottom: 0;
+  }
+
+  .panel {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    border: none;
+    display: none;
+    background: var(--bg);
+  }
+
+  .panel.active { display: block; }
+  .panel iframe {
+    width: 100%; height: 100%;
+    border: none; display: block;
+  }
+
+  /* ── Mobile: collapse labels on narrow viewports ── */
+  @media (max-width: 500px) {
+    .nav-tab .tab-label { display: none; }
+    .nav-tab { padding: 8px 10px; }
+    .nav-brand span { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-brand" href="#" onclick="return false;">
+    <div class="nav-brand-mark">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+      </svg>
+    </div>
+    <span>Design Sandbox</span>
+  </a>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" id="tab-storyboard" onclick="showTab('storyboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      <span class="tab-label">Storyboard</span>
+    </button>
+
+    <button class="nav-tab" id="tab-krea" onclick="showTab('krea')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3L14.5 4z"/>
+        <circle cx="12" cy="13" r="3"/>
+      </svg>
+      <span class="tab-label">Krea Generator</span>
+    </button>
+
+    <button class="nav-tab orange" id="tab-higgsfield" onclick="showTab('higgsfield')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+      </svg>
+      <span class="tab-label">Higgsfield Generator</span>
+    </button>
+  </div>
+
+  <div class="nav-right">
+    <span class="nav-badge">v1.0</span>
+  </div>
+</nav>
+
+<div class="panels">
+  <div class="panel active" id="panel-storyboard">
+    <iframe src="storyboard-app.html" title="Storyboard"></iframe>
+  </div>
+  <div class="panel" id="panel-krea">
+    <iframe src="docx_to_krea_v5.html" title="Krea Generator"></iframe>
+  </div>
+  <div class="panel" id="panel-higgsfield">
+    <iframe src="higgsfield-generator.html" title="Higgsfield Generator"></iframe>
+  </div>
+</div>
+
+<script>
+const TABS = ['storyboard', 'krea', 'higgsfield'];
+
+function showTab(name) {
+  TABS.forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === name);
+    document.getElementById('panel-' + t).classList.toggle('active', t === name);
+  });
+  history.replaceState(null, '', '#' + name);
+}
+
+// Restore tab from URL hash on load
+(function() {
+  const hash = location.hash.replace('#', '');
+  if (TABS.includes(hash)) showTab(hash);
+})();
+</script>
+</body>
+</html>
