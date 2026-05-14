@@ -280,7 +280,8 @@
   <div class="sb-tabs" id="sb-tabs"></div>
   <div class="topbar-actions">
     <button class="btn" onclick="newBoard()">+ New</button>
-    <button class="btn" onclick="saveProject()" title="Save all storyboards to a .sboard file">💾 Save project</button>
+    <button class="btn" onclick="saveProject()" title="Save to Projects dashboard">💾 Save project</button>
+    <button class="btn" onclick="saveProjectLocally()" title="Download .sboard file to disk">⬇ Save locally</button>
     <button class="btn" onclick="triggerLoadProject()" title="Load a .sboard file">📂 Load project</button>
     <input type="file" id="load-project-input" accept=".sboard,.json" style="display:none" onchange="loadProject(event)">
     <button class="btn" onclick="exportJSON()">⬇ JSON</button>
@@ -690,6 +691,14 @@ function saveProject(){
     fileType:'.sboard', name, data:JSON.stringify(project) }, '*');
   const btn = document.querySelector('button[onclick="saveProject()"]');
   if (btn) { const orig=btn.innerHTML; btn.innerHTML='✓ Saved!'; btn.disabled=true; setTimeout(()=>{btn.innerHTML=orig;btn.disabled=false;},1800); }
+}
+
+function saveProjectLocally(){
+  const project = { version:1, savedAt:new Date().toISOString(), boards:JSON.parse(JSON.stringify(boards)), imgs:{} };
+  project.boards.forEach(b=>{ b.shots.forEach(s=>{ if(s.imgKey&&imgs[s.imgKey]) project.imgs[s.imgKey]=imgs[s.imgKey]; (s.refs||[]).forEach(r=>{ if(r.type==='img'&&r.value&&imgs[r.value]) project.imgs[r.value]=imgs[r.value]; }); }); });
+  const name = (active&&active.name)||'project';
+  const blob = new Blob([JSON.stringify(project)],{type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name.replace(/\s+/g,'_')+'.sboard'; a.click(); URL.revokeObjectURL(a.href);
 }
 
 function triggerLoadProject(){ document.getElementById('load-project-input').click(); }

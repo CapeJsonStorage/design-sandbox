@@ -434,6 +434,7 @@ const MiniZip = {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
           Copy TamperMonkey Script
         </button>
+        <button class="btn-ghost" onclick="saveHighsfieldLocally()">⬇ Save locally</button>
         <button class="btn-ghost" onclick="resetDoc()">Try another file</button>
       </div>
     </div>
@@ -484,6 +485,7 @@ const MiniZip = {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         Save to Projects
       </button>
+      <button class="btn-ghost" onclick="saveHighsfieldLocally()">⬇ Save locally</button>
       <button class="btn-ghost" onclick="resetDir()">Choose another folder</button>
     </div>
   </div>
@@ -911,7 +913,16 @@ function buildHighsfieldProject(blocks, projectName) {
   return { nodes, edges };
 }
 
+let _lastHFData = null, _lastHFName = '';
+function saveHighsfieldLocally() {
+  if (!_lastHFData) return;
+  const blob = new Blob([JSON.stringify(_lastHFData,null,2)],{type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=(_lastHFName||'project')+'.higgsfield.json'; a.click(); URL.revokeObjectURL(a.href);
+}
+
 function downloadHighsfield(data, name) {
+  _lastHFData = data; _lastHFName = name||'project';
   window.parent.postMessage({ type:'save-project', source:'higgsfield',
     fileType:'.higgsfield.json', name: name||'project', data: JSON.stringify(data) }, '*');
   ['btn-doc-dl', 'btn-dir-dl'].forEach(id => {
