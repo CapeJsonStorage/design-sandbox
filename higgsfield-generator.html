@@ -1064,7 +1064,7 @@ function copyTamperMonkeyScript() {
   function toObjById(arr) { var o = {}; arr.forEach(function(x) { o[x.id] = x; }); return o; }
 
   const _interceptLog = [];
-  var _wsRef = null, _seq = null, _clientId = null, _opsSent = false;
+  var _wsRef = null, _seq = null, _clientId = null, _opsSent = false, _done = false;
 
   function genUUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -1073,6 +1073,7 @@ function copyTamperMonkeyScript() {
   }
 
   function mergeIntoState(obj) {
+    if (_done) return false;
     if (!obj || typeof obj !== 'object') return false;
     if (obj.type === 'op' && obj.payload && obj.payload.snapshot) {
       var snap = obj.payload.snapshot;
@@ -1238,6 +1239,7 @@ function copyTamperMonkeyScript() {
       toast('✓ ' + n + ' nodes injected' + (_interceptLog.length ? ' + WS active' : ' via onNodesChange'), '#16a34a');
     }
     console.log('[HF inject] Done — ' + n + ' nodes, ' + e + ' edges via ' + ctrl.kind + (_interceptLog.length ? ' + WS intercept' : ''));
+    setTimeout(function() { _done = true; window.fetch = _origFetch; }, 3000);
   }
 
   // ── Debug helper — call window.__hfDebug() in console to inspect ───────────
