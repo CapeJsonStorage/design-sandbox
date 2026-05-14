@@ -291,6 +291,21 @@ const MiniZip = {
   .btn-retry:hover { background:#fee2e2; }
   .gen-cors-warn { background:#fffbeb; border:1px solid #fcd34d; border-radius:9px;
     padding:12px 14px; font-size:12px; color:#92400e; line-height:1.5; display:none; }
+  .loaded-banner {
+    display:none; align-items:center; gap:12px; flex-wrap:wrap;
+    background:#fff7ed; border:1px solid #fdba74; border-radius:10px;
+    padding:12px 16px; margin:0 0 18px; font-size:13px; color:#c2410c;
+  }
+  .loaded-banner.visible { display:flex; }
+  .loaded-banner strong { font-weight:600; color:#9a3412; }
+  .loaded-banner .lb-meta { color:#ea580c; font-size:12px; }
+  .loaded-banner .lb-right { margin-left:auto; display:flex; gap:8px; align-items:center; }
+  .loaded-banner button { padding:6px 12px; border-radius:7px; border:1px solid #fdba74;
+    background:white; color:#c2410c; font-size:12px; font-weight:500; cursor:pointer; }
+  .loaded-banner button:hover { background:#fff7ed; }
+  .loaded-banner .lb-dismiss { background:none; border:none; color:#fdba74; font-size:16px;
+    cursor:pointer; padding:0 4px; line-height:1; }
+  .loaded-banner .lb-dismiss:hover { color:#c2410c; }
 </style>
 </head>
 <body>
@@ -316,6 +331,19 @@ const MiniZip = {
 </div>
 
 <div class="page">
+
+  <!-- loaded-from-projects banner -->
+  <div class="loaded-banner" id="loaded-banner">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+    <div>
+      <strong id="lb-name">project.higgsfield.json</strong>
+      <div class="lb-meta" id="lb-meta"></div>
+    </div>
+    <div class="lb-right">
+      <button onclick="redownloadLoaded()">Re-download</button>
+      <button class="lb-dismiss" onclick="document.getElementById('loaded-banner').classList.remove('visible')" title="Dismiss">×</button>
+    </div>
+  </div>
 
   <!-- ══════════════ TAB 1: DOCUMENT ══════════════ -->
   <div class="panel on" id="panel-doc">
@@ -1583,6 +1611,26 @@ async function downloadDirHighsfield() {
 
 function showDirErr(m) { const b=document.getElementById('dir-err'); b.textContent=m; b.style.display='block'; }
 function hideDirErr()  { document.getElementById('dir-err').style.display='none'; }
+
+let _loadedData = null, _loadedName = '';
+function redownloadLoaded() {
+  if (!_loadedData) return;
+  downloadHighsfield(_loadedData, _loadedName);
+}
+
+window.addEventListener('message', e => {
+  if (!e.data || e.data.type !== 'load-project') return;
+  try {
+    const proj = JSON.parse(e.data.data);
+    _loadedData = proj;
+    _loadedName = proj.project || proj.name || 'project';
+    const taskCount = Array.isArray(proj.tasks) ? proj.tasks.length
+      : Array.isArray(proj.nodes) ? proj.nodes.length : 0;
+    document.getElementById('lb-name').textContent = _loadedName + '.higgsfield.json';
+    document.getElementById('lb-meta').textContent = taskCount + ' node' + (taskCount !== 1 ? 's' : '');
+    document.getElementById('loaded-banner').classList.add('visible');
+  } catch(err) { console.error('load-project error', err); }
+});
 </script>
 </body>
 </html>

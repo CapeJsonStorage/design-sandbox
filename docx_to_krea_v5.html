@@ -186,6 +186,21 @@ const MiniZip = {
   .btn-ghost:hover { background:#f5f5f5; }
   .err { background:#fff5f5; border:1px solid #fecaca; border-radius:9px;
     padding:12px 16px; color:#dc2626; font-size:13px; width:100%; display:none; }
+  .loaded-banner {
+    display:none; align-items:center; gap:12px; flex-wrap:wrap;
+    background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px;
+    padding:12px 16px; margin:0 0 18px; font-size:13px; color:#15803d;
+  }
+  .loaded-banner.visible { display:flex; }
+  .loaded-banner strong { font-weight:600; color:#166534; }
+  .loaded-banner .lb-meta { color:#16a34a; font-size:12px; }
+  .loaded-banner .lb-right { margin-left:auto; display:flex; gap:8px; align-items:center; }
+  .loaded-banner button { padding:6px 12px; border-radius:7px; border:1px solid #86efac;
+    background:white; color:#15803d; font-size:12px; font-weight:500; cursor:pointer; }
+  .loaded-banner button:hover { background:#f0fdf4; }
+  .loaded-banner .lb-dismiss { background:none; border:none; color:#86efac; font-size:16px;
+    cursor:pointer; padding:0 4px; line-height:1; }
+  .loaded-banner .lb-dismiss:hover { color:#15803d; }
 </style>
 </head>
 <body>
@@ -211,6 +226,19 @@ const MiniZip = {
 </div>
 
 <div class="page">
+
+  <!-- loaded-from-projects banner -->
+  <div class="loaded-banner" id="loaded-banner">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    <div>
+      <strong id="lb-name">project.krea</strong>
+      <div class="lb-meta" id="lb-meta"></div>
+    </div>
+    <div class="lb-right">
+      <button onclick="redownloadLoaded()">Re-download</button>
+      <button class="lb-dismiss" onclick="document.getElementById('loaded-banner').classList.remove('visible')" title="Dismiss">×</button>
+    </div>
+  </div>
 
   <!-- ══════════════ TAB 1: DOCUMENT ══════════════ -->
   <div class="panel on" id="panel-doc">
@@ -898,6 +926,25 @@ async function downloadDirKrea() {
 
 function showDirErr(m) { const b=document.getElementById('dir-err'); b.textContent=m; b.style.display='block'; }
 function hideDirErr()  { document.getElementById('dir-err').style.display='none'; }
+
+let _loadedData = null, _loadedName = '';
+function redownloadLoaded() {
+  if (!_loadedData) return;
+  downloadKrea(_loadedData, _loadedName);
+}
+
+window.addEventListener('message', e => {
+  if (!e.data || e.data.type !== 'load-project') return;
+  try {
+    const proj = JSON.parse(e.data.data);
+    _loadedData = proj;
+    _loadedName = proj.metadata && proj.metadata.name ? proj.metadata.name : 'project';
+    const nodeCount = Array.isArray(proj.nodes) ? proj.nodes.length : 0;
+    document.getElementById('lb-name').textContent = _loadedName + '.krea';
+    document.getElementById('lb-meta').textContent = nodeCount + ' node' + (nodeCount !== 1 ? 's' : '');
+    document.getElementById('loaded-banner').classList.add('visible');
+  } catch(err) { console.error('load-project error', err); }
+});
 </script>
 </body>
 </html>

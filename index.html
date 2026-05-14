@@ -292,8 +292,8 @@ window.addEventListener('message', async e => {
       }
       // Brief visual cue via the iframe
       panelIframe.contentWindow.postMessage({ type: 'script-copied' }, '*');
-    } else if (d.fileType === '.sboard') {
-      // Wait for iframe to be ready then send project data
+    } else {
+      // .sboard, .krea, .higgsfield.json — forward data to the tab's iframe
       const send = () => panelIframe.contentWindow.postMessage({ type: 'load-project', data: d.data }, '*');
       if (panelIframe.contentDocument && panelIframe.contentDocument.readyState === 'complete') {
         send();
@@ -301,7 +301,6 @@ window.addEventListener('message', async e => {
         panelIframe.addEventListener('load', send, { once: true });
       }
     }
-    // For .krea / .higgsfield.json: just switching tab is enough (files are outputs not importable)
   }
 });
 
