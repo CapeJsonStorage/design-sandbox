@@ -81,6 +81,7 @@
 
   .nav-tab.active.orange { background: #fff7ed; color: #c2410c; }
   .nav-tab.active.green  { background: #f0fdf4; color: #15803d; }
+  .nav-tab.active.purple { background: #faf5ff; color: #7e22ce; }
 
   .nav-right {
     margin-left: auto; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
@@ -134,6 +135,13 @@
   </a>
 
   <div class="nav-tabs">
+    <button class="nav-tab purple" id="tab-projects" onclick="showTab('projects')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+      </svg>
+      <span class="tab-label">Projects</span>
+    </button>
     <button class="nav-tab active" id="tab-storyboard" onclick="showTab('storyboard')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
@@ -163,6 +171,9 @@
 </nav>
 
 <div class="panels">
+  <div class="panel" id="panel-projects">
+    <iframe src="projects-dashboard.html" title="Projects"></iframe>
+  </div>
   <div class="panel active" id="panel-storyboard">
     <iframe src="storyboard-app.html" title="Storyboard"></iframe>
   </div>
@@ -170,12 +181,12 @@
     <iframe src="docx_to_krea_v5.html" title="Krea Generator"></iframe>
   </div>
   <div class="panel" id="panel-higgsfield">
-    <iframe src="higgsfield-generator.html" title="Higgsfield Generator"></iframe>
+    <iframe src="higgsfield-generator.html" title="Higgsfield Generator" allow="clipboard-write"></iframe>
   </div>
 </div>
 
 <script>
-const TABS = ['storyboard', 'krea', 'higgsfield'];
+const TABS = ['projects', 'storyboard', 'krea', 'higgsfield'];
 
 function showTab(name) {
   TABS.forEach(t => {
@@ -183,6 +194,7 @@ function showTab(name) {
     document.getElementById('panel-' + t).classList.toggle('active', t === name);
   });
   history.replaceState(null, '', '#' + name);
+  if (name === 'projects') _notifyDashboard();
 }
 
 // Restore tab from URL hash on load
@@ -190,6 +202,109 @@ function showTab(name) {
   const hash = location.hash.replace('#', '');
   if (TABS.includes(hash)) showTab(hash);
 })();
+
+// ── IndexedDB (stores project records saved by generator iframes) ─────────────
+// Note: requires same-origin context (GitHub Pages). file:// won't share origin across iframes.
+let _db = null;
+
+function _openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('DesignSandboxDB', 1);
+    req.onupgradeneeded = e => {
+      e.target.result.createObjectStore('projects', { keyPath: 'id', autoIncrement: true });
+    };
+    req.onsuccess = e => { _db = e.target.result; resolve(_db); };
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+function _dbSave(record) {
+  return new Promise(resolve => {
+    if (!_db) return resolve();
+    const req = _db.transaction('projects', 'readwrite').objectStore('projects').add(record);
+    req.onsuccess = () => resolve();
+    req.onerror = () => resolve();
+  });
+}
+
+function _dbGetAll() {
+  return new Promise(resolve => {
+    if (!_db) return resolve([]);
+    const req = _db.transaction('projects', 'readonly').objectStore('projects').getAll();
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror = () => resolve([]);
+  });
+}
+
+function _dbDelete(id) {
+  if (!_db) return;
+  _db.transaction('projects', 'readwrite').objectStore('projects').delete(id);
+}
+
+function _notifyDashboard() {
+  const f = document.querySelector('#panel-projects iframe');
+  if (f) f.contentWindow.postMessage({ type: 'projects-updated' }, '*');
+}
+
+// Handle messages from generator iframes and the dashboard
+window.addEventListener('message', async e => {
+  const d = e.data;
+  if (!d || !d.type) return;
+
+  if (d.type === 'save-project') {
+    const dataStr = typeof d.data === 'string' ? d.data : JSON.stringify(d.data);
+    await _dbSave({
+      source: d.source,
+      fileType: d.fileType,
+      name: (d.name || 'Untitled').replace(/\.docx$/i, ''),
+      createdAt: new Date().toISOString(),
+      size: new Blob([dataStr]).size,
+      data: dataStr
+    });
+    _notifyDashboard();
+  }
+
+  if (d.type === 'get-projects') {
+    const records = await _dbGetAll();
+    e.source.postMessage({ type: 'projects-data', records }, '*');
+  }
+
+  if (d.type === 'delete-project') {
+    _dbDelete(d.id);
+    _notifyDashboard();
+  }
+
+  if (d.type === 'open-project') {
+    const tab = d.source; // 'storyboard' | 'krea' | 'higgsfield'
+    showTab(tab);
+    const panelIframe = document.querySelector('#panel-' + tab + ' iframe');
+    if (!panelIframe) return;
+
+    if (d.fileType === '.js') {
+      // Copy TamperMonkey script to clipboard
+      try {
+        await navigator.clipboard.writeText(d.data);
+      } catch (_) {
+        const ta = document.createElement('textarea');
+        ta.value = d.data; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+      }
+      // Brief visual cue via the iframe
+      panelIframe.contentWindow.postMessage({ type: 'script-copied' }, '*');
+    } else {
+      // .sboard, .krea, .higgsfield.json — forward data to the tab's iframe
+      const send = () => panelIframe.contentWindow.postMessage({ type: 'load-project', data: d.data }, '*');
+      if (panelIframe.contentDocument && panelIframe.contentDocument.readyState === 'complete') {
+        send();
+      } else {
+        panelIframe.addEventListener('load', send, { once: true });
+      }
+    }
+  }
+});
+
+_openDB();
 </script>
 </body>
 </html>
