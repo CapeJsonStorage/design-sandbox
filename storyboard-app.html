@@ -685,14 +685,11 @@ function saveProject(){
       (s.refs||[]).forEach(r=>{ if(r.type==='img'&&r.value&&imgs[r.value]) project.imgs[r.value]=imgs[r.value]; });
     });
   });
-  const blob = new Blob([JSON.stringify(project)],{type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
   const name = (active&&active.name)||'project';
-  a.download = name.replace(/\s+/g,'_')+'.sboard';
-  a.click();
   window.parent.postMessage({ type:'save-project', source:'storyboard',
     fileType:'.sboard', name, data:JSON.stringify(project) }, '*');
+  const btn = document.querySelector('button[onclick="saveProject()"]');
+  if (btn) { const orig=btn.innerHTML; btn.innerHTML='✓ Saved!'; btn.disabled=true; setTimeout(()=>{btn.innerHTML=orig;btn.disabled=false;},1800); }
 }
 
 function triggerLoadProject(){ document.getElementById('load-project-input').click(); }
