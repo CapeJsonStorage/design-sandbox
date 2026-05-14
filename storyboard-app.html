@@ -697,6 +697,19 @@ function saveProject(){
 
 function triggerLoadProject(){ document.getElementById('load-project-input').click(); }
 
+window.addEventListener('message', e => {
+  if (!e.data || e.data.type !== 'load-project') return;
+  try {
+    const project = JSON.parse(e.data.data);
+    if (!project.boards) throw new Error('Invalid project file');
+    Object.assign(imgs, project.imgs || {});
+    boards = project.boards;
+    active = null;
+    if (boards.length) setActive(boards[0].id);
+    else { renderTabs(); setActive(null); }
+  } catch(err) { alert('Could not open project: ' + err.message); }
+});
+
 function loadProject(e){
   const file = e.target.files[0]; if(!file) return;
   const reader = new FileReader();

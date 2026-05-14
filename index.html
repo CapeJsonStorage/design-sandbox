@@ -273,6 +273,36 @@ window.addEventListener('message', async e => {
     _dbDelete(d.id);
     _notifyDashboard();
   }
+
+  if (d.type === 'open-project') {
+    const tab = d.source; // 'storyboard' | 'krea' | 'higgsfield'
+    showTab(tab);
+    const panelIframe = document.querySelector('#panel-' + tab + ' iframe');
+    if (!panelIframe) return;
+
+    if (d.fileType === '.js') {
+      // Copy TamperMonkey script to clipboard
+      try {
+        await navigator.clipboard.writeText(d.data);
+      } catch (_) {
+        const ta = document.createElement('textarea');
+        ta.value = d.data; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+      }
+      // Brief visual cue via the iframe
+      panelIframe.contentWindow.postMessage({ type: 'script-copied' }, '*');
+    } else if (d.fileType === '.sboard') {
+      // Wait for iframe to be ready then send project data
+      const send = () => panelIframe.contentWindow.postMessage({ type: 'load-project', data: d.data }, '*');
+      if (panelIframe.contentDocument && panelIframe.contentDocument.readyState === 'complete') {
+        send();
+      } else {
+        panelIframe.addEventListener('load', send, { once: true });
+      }
+    }
+    // For .krea / .higgsfield.json: just switching tab is enough (files are outputs not importable)
+  }
 });
 
 _openDB();

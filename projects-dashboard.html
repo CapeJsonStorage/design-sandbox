@@ -101,6 +101,15 @@
     transition: background .12s, border-color .12s;
   }
   .btn-action:hover { background: #252530; border-color: #3a3a48; }
+  .btn-open {
+    padding: 7px 10px; border-radius: 7px;
+    border: 1px solid var(--card-border); background: none;
+    color: var(--text-muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .12s, color .12s, border-color .12s;
+  }
+  .btn-open:hover { background: #1a1f2a; color: #6366f1; border-color: #3a3a70; }
+
   .btn-del {
     padding: 7px 10px; border-radius: 7px;
     border: 1px solid var(--card-border); background: none;
@@ -233,6 +242,9 @@
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Download
           </button>
+          <button class="btn-open" onclick="open_(${r.id})" title="Open in tab">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </button>
           <button class="btn-del" onclick="del(${r.id})" title="Delete">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
           </button>
@@ -254,6 +266,12 @@
 
   function del(id) {
     window.parent.postMessage({ type: 'delete-project', id }, '*');
+  }
+
+  function open_(id) {
+    const r = records.find(x => x.id === id);
+    if (!r) return;
+    window.parent.postMessage({ type: 'open-project', id: r.id, source: r.source, fileType: r.fileType, data: r.data }, '*');
   }
 
   window.addEventListener('message', e => {
