@@ -889,6 +889,8 @@ function downloadHighsfield(data, name) {
   a.href = URL.createObjectURL(blob);
   a.download = (name || 'project') + '.higgsfield.json';
   a.click(); URL.revokeObjectURL(a.href);
+  window.parent.postMessage({ type:'save-project', source:'higgsfield',
+    fileType:'.higgsfield.json', name: name||'project', data: JSON.stringify(data) }, '*');
 }
 
 function copyTamperMonkeyScript() {
@@ -1172,6 +1174,8 @@ function copyTamperMonkeyScript() {
   navigator.clipboard.writeText(script).then(showCopied).catch(() => {
     if (execCopy()) { showCopied(); } else { alert('Copy failed — please copy manually from the console.'); console.log(script); }
   });
+  window.parent.postMessage({ type:'save-project', source:'higgsfield',
+    fileType:'.js', name: projectName, data: script }, '*');
 }
 
 // ── Generation panel ──────────────────────────────────────────────────────────

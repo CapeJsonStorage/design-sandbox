@@ -691,6 +691,8 @@ function saveProject(){
   const name = (active&&active.name)||'project';
   a.download = name.replace(/\s+/g,'_')+'.sboard';
   a.click();
+  window.parent.postMessage({ type:'save-project', source:'storyboard',
+    fileType:'.sboard', name, data:JSON.stringify(project) }, '*');
 }
 
 function triggerLoadProject(){ document.getElementById('load-project-input').click(); }

@@ -336,6 +336,8 @@ function downloadKrea(data, name) {
   a.href = URL.createObjectURL(blob);
   a.download = (name||'project')+'.krea';
   a.click(); URL.revokeObjectURL(a.href);
+  window.parent.postMessage({ type:'save-project', source:'krea',
+    fileType:'.krea', name: name||'project', data: JSON.stringify(data) }, '*');
 }
 
 // ═══════════════════════════════════════════════════════════════

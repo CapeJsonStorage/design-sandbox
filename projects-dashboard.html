@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projects</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f0f11;
+    --card: #1a1a1f;
+    --card-border: #27272f;
+    --card-hover: #202028;
+    --text: #f0f0f4;
+    --text-muted: #888;
+    --text-dim: #444;
+    --indigo: #6366f1;
+    --indigo-bg: #1c1d3a;
+    --orange: #f97316;
+    --orange-bg: #271a0c;
+    --green: #16a34a;
+    --green-bg: #0c1f12;
+    --red: #ef4444;
+  }
+  html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); }
+  body { padding: 32px 28px; overflow-y: auto; }
+
+  /* ── Top bar ── */
+  .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; gap: 16px; }
+  .top-left h1 { font-size: 22px; font-weight: 700; letter-spacing: -.4px; }
+  .top-left p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+  .search-wrap {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--card); border: 1px solid var(--card-border);
+    border-radius: 9px; padding: 8px 14px; width: 240px; flex-shrink: 0;
+  }
+  .search-wrap svg { color: var(--text-muted); flex-shrink: 0; }
+  .search-wrap input {
+    background: none; border: none; outline: none;
+    font: 13px -apple-system, sans-serif; color: var(--text); width: 100%;
+  }
+  .search-wrap input::placeholder { color: var(--text-dim); }
+
+  /* ── Filter pills ── */
+  .filters { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
+  .filter-btn {
+    padding: 6px 16px; border-radius: 20px;
+    border: 1px solid var(--card-border);
+    background: none; color: var(--text-muted);
+    font: 12px/1.5 -apple-system, sans-serif; font-weight: 500;
+    cursor: pointer; transition: all .12s;
+  }
+  .filter-btn:hover { border-color: #444; color: var(--text); background: #1a1a1f; }
+  .filter-btn.active { border-color: #555; color: var(--text); background: var(--card); }
+  .filter-btn.f-storyboard.active { background: var(--indigo-bg); color: var(--indigo); border-color: var(--indigo); }
+  .filter-btn.f-krea.active { background: var(--orange-bg); color: var(--orange); border-color: var(--orange); }
+  .filter-btn.f-higgsfield.active { background: var(--green-bg); color: var(--green); border-color: var(--green); }
+
+  /* ── Card grid ── */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--card-border);
+    border-radius: 12px; display: flex; flex-direction: column;
+    transition: border-color .15s, background .15s;
+    overflow: hidden;
+  }
+  .card:hover { background: var(--card-hover); border-color: #36363f; }
+
+  .card-body { padding: 18px 18px 12px; flex: 1; }
+  .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+  .card-name { font-size: 15px; font-weight: 600; line-height: 1.4; word-break: break-word; color: var(--text); }
+
+  .badge {
+    flex-shrink: 0; font-size: 9px; font-weight: 700;
+    padding: 3px 8px; border-radius: 10px;
+    letter-spacing: .5px; text-transform: uppercase;
+  }
+  .badge.storyboard { background: var(--indigo-bg); color: var(--indigo); }
+  .badge.krea { background: var(--orange-bg); color: var(--orange); }
+  .badge.higgsfield { background: var(--green-bg); color: var(--green); }
+
+  .card-chips { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    font: 11px/1.4 monospace; padding: 2px 7px;
+    border-radius: 4px; background: #1f1f27;
+    color: var(--text-muted); border: 1px solid #2f2f3a;
+  }
+  .sep { color: var(--text-dim); font-size: 11px; }
+  .meta { font-size: 12px; color: var(--text-muted); }
+
+  .card-footer {
+    padding: 10px 14px; border-top: 1px solid var(--card-border);
+    display: flex; gap: 8px;
+  }
+  .btn-action {
+    flex: 1; padding: 7px 10px; border-radius: 7px;
+    border: 1px solid var(--card-border); background: none;
+    color: var(--text); font: 12px -apple-system, sans-serif; font-weight: 500;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: background .12s, border-color .12s;
+  }
+  .btn-action:hover { background: #252530; border-color: #3a3a48; }
+  .btn-del {
+    padding: 7px 10px; border-radius: 7px;
+    border: 1px solid var(--card-border); background: none;
+    color: var(--text-muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .12s, color .12s, border-color .12s;
+  }
+  .btn-del:hover { background: #2a1515; color: var(--red); border-color: #5a2020; }
+
+  /* ── Empty state ── */
+  .empty {
+    grid-column: 1 / -1;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 80px 20px; text-align: center;
+  }
+  .empty-icon {
+    width: 56px; height: 56px; border-radius: 14px;
+    background: var(--card); border: 1px solid var(--card-border);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px; color: var(--text-dim);
+  }
+  .empty h3 { font-size: 16px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
+  .empty p { font-size: 13px; color: var(--text-dim); line-height: 1.7; max-width: 320px; }
+
+  /* ── Count label ── */
+  .count { font-size: 12px; color: var(--text-dim); margin-bottom: 14px; }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="top-left">
+    <h1>Projects</h1>
+    <p>Files saved from Storyboard, Krea, and Higgsfield</p>
+  </div>
+  <div class="search-wrap">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="search" placeholder="Search projects…" oninput="render()">
+  </div>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" id="f-all" onclick="setFilter('all')">All</button>
+  <button class="filter-btn f-storyboard" id="f-storyboard" onclick="setFilter('storyboard')">Storyboard</button>
+  <button class="filter-btn f-krea" id="f-krea" onclick="setFilter('krea')">Krea Generator</button>
+  <button class="filter-btn f-higgsfield" id="f-higgsfield" onclick="setFilter('higgsfield')">Higgsfield Generator</button>
+</div>
+
+<div class="count" id="count"></div>
+<div class="grid" id="grid"></div>
+
+<script>
+  let records = [], activeFilter = 'all';
+
+  function timeAgo(iso) {
+    const s = (Date.now() - new Date(iso)) / 1000;
+    if (s < 60) return 'just now';
+    if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+    if (s < 86400 * 7) return Math.floor(s / 86400) + 'd ago';
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function fmtSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function sourceLabel(s) {
+    return s === 'higgsfield' ? 'Higgsfield' : s === 'krea' ? 'Krea' : 'Storyboard';
+  }
+
+  function setFilter(f) {
+    activeFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('f-' + f).classList.add('active');
+    render();
+  }
+
+  function render() {
+    const q = (document.getElementById('search').value || '').toLowerCase();
+    const filtered = records
+      .filter(r => {
+        if (activeFilter !== 'all' && r.source !== activeFilter) return false;
+        if (q && !r.name.toLowerCase().includes(q)) return false;
+        return true;
+      })
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const countEl = document.getElementById('count');
+    countEl.textContent = filtered.length ? filtered.length + ' project' + (filtered.length === 1 ? '' : 's') : '';
+
+    const grid = document.getElementById('grid');
+    if (!filtered.length) {
+      grid.innerHTML = `
+        <div class="empty">
+          <div class="empty-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <h3>No projects yet</h3>
+          <p>Save or export a file from the Storyboard, Krea Generator, or Higgsfield Generator tab — it will appear here automatically.</p>
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(r => `
+      <div class="card">
+        <div class="card-body">
+          <div class="card-header">
+            <div class="card-name">${esc(r.name)}</div>
+            <span class="badge ${r.source}">${sourceLabel(r.source)}</span>
+          </div>
+          <div class="card-chips">
+            <span class="chip">${esc(r.fileType)}</span>
+            <span class="sep">·</span>
+            <span class="meta">${timeAgo(r.createdAt)}</span>
+            <span class="sep">·</span>
+            <span class="meta">${fmtSize(r.size)}</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="btn-action" onclick="download(${r.id})">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+          </button>
+          <button class="btn-del" onclick="del(${r.id})" title="Delete">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          </button>
+        </div>
+      </div>`).join('');
+  }
+
+  function download(id) {
+    const r = records.find(x => x.id === id);
+    if (!r) return;
+    const mime = r.fileType === '.js' ? 'text/javascript' : 'application/json';
+    const blob = new Blob([r.data], { type: mime });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = r.name.replace(/\s+/g, '_') + r.fileType;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function del(id) {
+    window.parent.postMessage({ type: 'delete-project', id }, '*');
+  }
+
+  window.addEventListener('message', e => {
+    if (!e.data || !e.data.type) return;
+    if (e.data.type === 'projects-data') {
+      records = e.data.records || [];
+      render();
+    }
+    if (e.data.type === 'projects-updated') {
+      window.parent.postMessage({ type: 'get-projects' }, '*');
+    }
+  });
+
+  // Request data on load
+  window.parent.postMessage({ type: 'get-projects' }, '*');
+</script>
+</body>
+</html>
