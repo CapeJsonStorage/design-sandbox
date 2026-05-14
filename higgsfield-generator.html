@@ -1073,12 +1073,17 @@ function copyTamperMonkeyScript() {
   }
 
   function mergeIntoState(obj) {
-    if (_done) return false;
     if (!obj || typeof obj !== 'object') return false;
     if (obj.type === 'op' && obj.payload && obj.payload.snapshot) {
       var snap = obj.payload.snapshot;
       if (snap && typeof snap.nodes === 'object') {
-        Object.assign(snap.nodes, toObjById(NODES));
+        var _nodesById = toObjById(NODES);
+        if (_done) {
+          // Ops sent — preserve server positions (allows dragging) but keep our nodes present
+          Object.keys(_nodesById).forEach(function(id) { if (!snap.nodes[id]) snap.nodes[id] = _nodesById[id]; });
+        } else {
+          Object.assign(snap.nodes, _nodesById);
+        }
         if (!snap.edges) snap.edges = {};
         Object.assign(snap.edges, toObjById(EDGES));
         if (typeof snap.seq === 'number' && snap.seq > (_seq || 0)) _seq = snap.seq;
@@ -1196,10 +1201,7 @@ function copyTamperMonkeyScript() {
   // ── Fiber walker — finds controller by capability ──────────────────────────
   function walkFiber(fiber, depth) {
     if (!fiber || depth > 70) return null;
-    // onNodesChange goes through parent React state and persists — check props first
-    const p = fiber.memoizedProps;
-    if (p && typeof p.onNodesChange === 'function') return { kind: 'onNodesChange', ref: fiber };
-    // Higgsfield-specific dispatchers (hook state)
+    // Check Higgsfield-specific dispatchers first (hook state) — these actually persist
     let hook = fiber.memoizedState;
     while (hook) {
       const v = hook.memoizedState;
@@ -1209,6 +1211,9 @@ function copyTamperMonkeyScript() {
       }
       hook = hook.next;
     }
+    // Fall back to onNodesChange prop
+    const p = fiber.memoizedProps;
+    if (p && typeof p.onNodesChange === 'function') return { kind: 'onNodesChange', ref: fiber };
     return walkFiber(fiber.child, depth + 1) || walkFiber(fiber.sibling, depth);
   }
 
