@@ -267,8 +267,9 @@
     }
   });
 
-  // Request data on load
+  // Request data on load, with a retry in case parent DB wasn't ready yet
   window.parent.postMessage({ type: 'get-projects' }, '*');
+  setTimeout(() => window.parent.postMessage({ type: 'get-projects' }, '*'), 800);
 </script>
 </body>
 </html>

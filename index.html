@@ -194,6 +194,7 @@ function showTab(name) {
     document.getElementById('panel-' + t).classList.toggle('active', t === name);
   });
   history.replaceState(null, '', '#' + name);
+  if (name === 'projects') _notifyDashboard();
 }
 
 // Restore tab from URL hash on load
@@ -218,8 +219,12 @@ function _openDB() {
 }
 
 function _dbSave(record) {
-  if (!_db) return;
-  _db.transaction('projects', 'readwrite').objectStore('projects').add(record);
+  return new Promise(resolve => {
+    if (!_db) return resolve();
+    const req = _db.transaction('projects', 'readwrite').objectStore('projects').add(record);
+    req.onsuccess = () => resolve();
+    req.onerror = () => resolve();
+  });
 }
 
 function _dbGetAll() {
@@ -248,7 +253,7 @@ window.addEventListener('message', async e => {
 
   if (d.type === 'save-project') {
     const dataStr = typeof d.data === 'string' ? d.data : JSON.stringify(d.data);
-    _dbSave({
+    await _dbSave({
       source: d.source,
       fileType: d.fileType,
       name: (d.name || 'Untitled').replace(/\.docx$/i, ''),
