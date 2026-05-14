@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1300,6 +1300,25 @@ function copyTamperMonkeyScript() {
   }
 
   if (document.readyState === 'complete') {
+    // Console paste: page already loaded, WS already connected.
+    // Capture the live WS on its next outgoing message so we can
+    // (a) patch dispatchEvent to intercept incoming snapshots and
+    // (b) send our node ops to the server via trySendNodeOps.
+    var _origProtoSend = WebSocket.prototype.send;
+    WebSocket.prototype.send = function(data) {
+      if (!_wsRef) {
+        _wsRef = this;
+        WebSocket.prototype.send = _origProtoSend;
+        // Intercept incoming messages on the already-open socket
+        var _origDE = _wsRef.dispatchEvent.bind(_wsRef);
+        _wsRef.dispatchEvent = function(event) {
+          if (event.type === 'message') return _origDE(patchWsEvent(event));
+          return _origDE(event);
+        };
+        setTimeout(trySendNodeOps, 300);
+      }
+      return _origProtoSend.call(this, data);
+    };
     setTimeout(tryInject, 500);
   } else {
     window.addEventListener('load', function () { setTimeout(tryInject, 1500); });
