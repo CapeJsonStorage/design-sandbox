@@ -164,6 +164,14 @@
       </svg>
       <span class="tab-label">Higgsfield Generator</span>
     </button>
+
+    <button class="nav-tab orange" id="tab-htools" onclick="showTab('htools')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+      </svg>
+      <span class="tab-label">Higgsfield Tools</span>
+    </button>
   </div>
 
   <div class="nav-right">
@@ -184,10 +192,13 @@
   <div class="panel" id="panel-higgsfield">
     <iframe src="higgsfield-generator.html" title="Higgsfield Generator" allow="clipboard-write"></iframe>
   </div>
+  <div class="panel" id="panel-htools">
+    <iframe src="higgsfield-tools.html" title="Higgsfield Tools"></iframe>
+  </div>
 </div>
 
 <script>
-const TABS = ['projects', 'storyboard', 'krea', 'higgsfield'];
+const TABS = ['projects', 'storyboard', 'krea', 'higgsfield', 'htools'];
 
 function showTab(name) {
   TABS.forEach(t => {
