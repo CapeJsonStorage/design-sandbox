@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Design Sandbox</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -203,42 +204,55 @@ function showTab(name) {
   if (TABS.includes(hash)) showTab(hash);
 })();
 
-// ── IndexedDB (stores project records saved by generator iframes) ─────────────
-// Note: requires same-origin context (GitHub Pages). file:// won't share origin across iframes.
-let _db = null;
+// ── Cloud storage (Supabase) ──────────────────────────────────────────────
+const SUPABASE_URL  = 'https://kgvobjhwtajmgutardci.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtndm9iamh3dGFqbWd1dGFyZGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MTI1OTksImV4cCI6MjA5NDM4ODU5OX0.ES04gGDdAPSTKqfOwmY9Fq6JGXzxpPy3glZZ5T8EWbs';
+const BUCKET        = 'project-data';
+const _supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-function _openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open('DesignSandboxDB', 1);
-    req.onupgradeneeded = e => {
-      e.target.result.createObjectStore('projects', { keyPath: 'id', autoIncrement: true });
-    };
-    req.onsuccess = e => { _db = e.target.result; resolve(_db); };
-    req.onerror = e => reject(e.target.error);
-  });
+function _deviceId() {
+  let id = localStorage.getItem('dsDeviceId');
+  if (!id) { id = crypto.randomUUID(); localStorage.setItem('dsDeviceId', id); }
+  return id;
 }
 
-function _dbSave(record) {
-  return new Promise(resolve => {
-    if (!_db) return resolve();
-    const req = _db.transaction('projects', 'readwrite').objectStore('projects').add(record);
-    req.onsuccess = () => resolve();
-    req.onerror = () => resolve();
+async function _dbSave(record) {
+  const did  = _deviceId();
+  const id   = crypto.randomUUID();
+  const path = `${did}/${id}`;
+  const { error: upErr } = await _supa.storage
+    .from(BUCKET)
+    .upload(path, record.data, { contentType: 'text/plain; charset=utf-8', upsert: false });
+  if (upErr) { console.error('Storage upload failed', upErr); return; }
+  const { error: dbErr } = await _supa.from('projects').insert({
+    id, device_id: did, source: record.source, file_type: record.fileType,
+    name: record.name, created_at: record.createdAt, size: record.size, storage_key: path
   });
+  if (dbErr) console.error('DB insert failed', dbErr);
 }
 
-function _dbGetAll() {
-  return new Promise(resolve => {
-    if (!_db) return resolve([]);
-    const req = _db.transaction('projects', 'readonly').objectStore('projects').getAll();
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror = () => resolve([]);
-  });
+async function _dbGetAll() {
+  const { data, error } = await _supa.from('projects')
+    .select('id, source, file_type, name, created_at, size, storage_key')
+    .eq('device_id', _deviceId())
+    .order('created_at', { ascending: false });
+  if (error) { console.error('DB list failed', error); return []; }
+  return (data || []).map(r => ({
+    id: r.id, source: r.source, fileType: r.file_type, name: r.name,
+    createdAt: r.created_at, size: r.size, _key: r.storage_key, data: ''
+  }));
 }
 
-function _dbDelete(id) {
-  if (!_db) return;
-  _db.transaction('projects', 'readwrite').objectStore('projects').delete(id);
+async function _dbGetData(storageKey) {
+  const { data, error } = await _supa.storage.from(BUCKET).download(storageKey);
+  if (error) { console.error('Storage download failed', error); return null; }
+  return await data.text();
+}
+
+async function _dbDelete(id) {
+  const { data } = await _supa.from('projects').select('storage_key').eq('id', id).single();
+  if (data) await _supa.storage.from(BUCKET).remove([data.storage_key]);
+  await _supa.from('projects').delete().eq('id', id);
 }
 
 function _notifyDashboard() {
@@ -254,12 +268,10 @@ window.addEventListener('message', async e => {
   if (d.type === 'save-project') {
     const dataStr = typeof d.data === 'string' ? d.data : JSON.stringify(d.data);
     await _dbSave({
-      source: d.source,
-      fileType: d.fileType,
+      source: d.source, fileType: d.fileType,
       name: (d.name || 'Untitled').replace(/\.docx$/i, ''),
       createdAt: new Date().toISOString(),
-      size: new Blob([dataStr]).size,
-      data: dataStr
+      size: new Blob([dataStr]).size, data: dataStr
     });
     _notifyDashboard();
   }
@@ -270,41 +282,39 @@ window.addEventListener('message', async e => {
   }
 
   if (d.type === 'delete-project') {
-    _dbDelete(d.id);
+    await _dbDelete(d.id);
     _notifyDashboard();
   }
 
+  if (d.type === 'get-project-data') {
+    const data = await _dbGetData(d._key);
+    e.source.postMessage({ type: 'project-data-response', id: d.id, data }, '*');
+  }
+
   if (d.type === 'open-project') {
-    const tab = d.source; // 'storyboard' | 'krea' | 'higgsfield'
+    let projectData = d.data;
+    if (!projectData && d._key) projectData = await _dbGetData(d._key);
+    if (!projectData) { console.error('Could not load project data'); return; }
+    const tab = d.source;
     showTab(tab);
     const panelIframe = document.querySelector('#panel-' + tab + ' iframe');
     if (!panelIframe) return;
-
     if (d.fileType === '.js') {
-      // Copy TamperMonkey script to clipboard
-      try {
-        await navigator.clipboard.writeText(d.data);
-      } catch (_) {
+      try { await navigator.clipboard.writeText(projectData); }
+      catch (_) {
         const ta = document.createElement('textarea');
-        ta.value = d.data; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        ta.value = projectData; ta.style.position = 'fixed'; ta.style.opacity = '0';
         document.body.appendChild(ta); ta.select();
         document.execCommand('copy'); document.body.removeChild(ta);
       }
-      // Brief visual cue via the iframe
       panelIframe.contentWindow.postMessage({ type: 'script-copied' }, '*');
     } else {
-      // .sboard, .krea, .higgsfield.json — forward data to the tab's iframe
-      const send = () => panelIframe.contentWindow.postMessage({ type: 'load-project', data: d.data }, '*');
-      if (panelIframe.contentDocument && panelIframe.contentDocument.readyState === 'complete') {
-        send();
-      } else {
-        panelIframe.addEventListener('load', send, { once: true });
-      }
+      const send = () => panelIframe.contentWindow.postMessage({ type: 'load-project', data: projectData }, '*');
+      if (panelIframe.contentDocument?.readyState === 'complete') send();
+      else panelIframe.addEventListener('load', send, { once: true });
     }
   }
 });
-
-_openDB();
 </script>
 </body>
 </html>
