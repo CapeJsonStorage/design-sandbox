@@ -210,22 +210,15 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const BUCKET        = 'project-data';
 const _supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-function _deviceId() {
-  let id = localStorage.getItem('dsDeviceId');
-  if (!id) { id = crypto.randomUUID(); localStorage.setItem('dsDeviceId', id); }
-  return id;
-}
-
 async function _dbSave(record) {
-  const did  = _deviceId();
   const id   = crypto.randomUUID();
-  const path = `${did}/${id}`;
+  const path = id;
   const { error: upErr } = await _supa.storage
     .from(BUCKET)
     .upload(path, record.data, { contentType: 'text/plain; charset=utf-8', upsert: false });
   if (upErr) { console.error('Storage upload failed', upErr); return; }
   const { error: dbErr } = await _supa.from('projects').insert({
-    id, device_id: did, source: record.source, file_type: record.fileType,
+    id, device_id: 'shared', source: record.source, file_type: record.fileType,
     name: record.name, created_at: record.createdAt, size: record.size, storage_key: path
   });
   if (dbErr) console.error('DB insert failed', dbErr);
@@ -234,7 +227,6 @@ async function _dbSave(record) {
 async function _dbGetAll() {
   const { data, error } = await _supa.from('projects')
     .select('id, source, file_type, name, created_at, size, storage_key')
-    .eq('device_id', _deviceId())
     .order('created_at', { ascending: false });
   if (error) { console.error('DB list failed', error); return []; }
   return (data || []).map(r => ({
