@@ -238,23 +238,21 @@
           </div>
         </div>
         <div class="card-footer">
-          <button class="btn-action" onclick="download(${r.id})">
+          <button class="btn-action" onclick="download('${r.id}')">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Download
           </button>
-          <button class="btn-open" onclick="open_(${r.id})" title="Open in tab">
+          <button class="btn-open" onclick="open_('${r.id}')" title="Open in tab">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </button>
-          <button class="btn-del" onclick="del(${r.id})" title="Delete">
+          <button class="btn-del" onclick="del('${r.id}')" title="Delete">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
           </button>
         </div>
       </div>`).join('');
   }
 
-  function download(id) {
-    const r = records.find(x => x.id === id);
-    if (!r) return;
+  function _doDownload(r) {
     const mime = r.fileType === '.js' ? 'text/javascript' : 'application/json';
     const blob = new Blob([r.data], { type: mime });
     const a = document.createElement('a');
@@ -264,6 +262,13 @@
     URL.revokeObjectURL(a.href);
   }
 
+  function download(id) {
+    const r = records.find(x => x.id === id);
+    if (!r) return;
+    if (r.data) { _doDownload(r); return; }
+    window.parent.postMessage({ type: 'get-project-data', id: r.id, _key: r._key }, '*');
+  }
+
   function del(id) {
     window.parent.postMessage({ type: 'delete-project', id }, '*');
   }
@@ -271,7 +276,7 @@
   function open_(id) {
     const r = records.find(x => x.id === id);
     if (!r) return;
-    window.parent.postMessage({ type: 'open-project', id: r.id, source: r.source, fileType: r.fileType, data: r.data }, '*');
+    window.parent.postMessage({ type: 'open-project', id: r.id, source: r.source, fileType: r.fileType, data: r.data, _key: r._key }, '*');
   }
 
   window.addEventListener('message', e => {
@@ -282,6 +287,10 @@
     }
     if (e.data.type === 'projects-updated') {
       window.parent.postMessage({ type: 'get-projects' }, '*');
+    }
+    if (e.data.type === 'project-data-response') {
+      const r = records.find(x => x.id === e.data.id);
+      if (r) { r.data = e.data.data; _doDownload(r); }
     }
   });
 
