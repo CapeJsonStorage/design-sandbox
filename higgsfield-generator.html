@@ -446,6 +446,7 @@ const MiniZip = {
           Copy TamperMonkey Script
         </button>
         <button class="btn-ghost" onclick="saveHighsfieldLocally()">⬇ Save locally</button>
+        <button class="btn-ghost" onclick="copyStrippedJson(this)">📋 Copy JSON (no images)</button>
         <button class="btn-ghost" onclick="resetDoc()">Try another file</button>
       </div>
     </div>
@@ -497,6 +498,7 @@ const MiniZip = {
         Save to Projects
       </button>
       <button class="btn-ghost" onclick="saveHighsfieldLocally()">⬇ Save locally</button>
+      <button class="btn-ghost" onclick="copyStrippedJson(this)">📋 Copy JSON (no images)</button>
       <button class="btn-ghost" onclick="resetDir()">Choose another folder</button>
     </div>
   </div>
@@ -1024,6 +1026,31 @@ function saveHighsfieldLocally() {
   const blob = new Blob([JSON.stringify(_lastHFData,null,2)],{type:'application/json'});
   const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download=(_lastHFName||'project')+'.higgsfield.json'; a.click(); URL.revokeObjectURL(a.href);
+}
+
+function copyStrippedJson(btn) {
+  if (!_lastHFData) return;
+  const stripped = JSON.parse(JSON.stringify(_lastHFData));
+  if (Array.isArray(stripped.nodes)) {
+    stripped.nodes.forEach(n => {
+      if (n.data) {
+        if (typeof n.data.url === 'string' && n.data.url.startsWith('data:')) n.data.url = '';
+        if (typeof n.data.previewUrl === 'string' && n.data.previewUrl.startsWith('data:')) n.data.previewUrl = '';
+      }
+    });
+  }
+  const json = JSON.stringify(stripped, null, 2);
+  const orig = btn.textContent;
+  navigator.clipboard.writeText(json).then(() => {
+    btn.textContent = '✓ Copied!'; btn.disabled = true;
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 1800);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = json; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    btn.textContent = '✓ Copied!'; btn.disabled = true;
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 1800);
+  });
 }
 
 function downloadHighsfield(data, name) {
