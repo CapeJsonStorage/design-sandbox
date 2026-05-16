@@ -116,6 +116,21 @@
   .ref-item-del:hover{color:var(--danger);background:#fde8e8;}
   .ref-empty{font-size:11px;color:var(--text-faint);padding:2px 0;}
 
+  /* SHOT OVERRIDE SECTION */
+  .shot-override-section{margin-bottom:6px;padding:5px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);}
+  .so-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .so-row+.so-row{margin-top:4px;}
+  .so-check{display:flex;align-items:center;gap:4px;cursor:pointer;font-size:10px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;user-select:none;}
+  .so-check input[type=checkbox]{accent-color:var(--accent);cursor:pointer;width:12px;height:12px;}
+  .so-sel{height:22px;padding:0 18px 0 6px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);font-family:'DM Mono',monospace;font-size:11px;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M1 3l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 4px center;cursor:pointer;}
+  .so-num{height:22px;width:58px;padding:0 5px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);font-family:'DM Mono',monospace;font-size:11px;outline:none;}
+  /* Shot field selects */
+  .sf select{width:100%;font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 22px 5px 7px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);color:var(--text);outline:none;transition:border-color .15s,background .15s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M1 3l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;cursor:pointer;}
+  .sf select:focus{border-color:var(--border-strong);background:var(--surface);}
+  .sf-motion-custom{margin-top:4px;}
+  .sf-motion-custom input{width:100%;font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 7px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);color:var(--text);outline:none;transition:border-color .15s,background .15s;}
+  .sf-motion-custom input:focus{border-color:var(--border-strong);background:var(--surface);}
+
   /* INSERT ZONE */
   .insert-zone{position:relative;height:32px;display:flex;align-items:center;justify-content:center;cursor:default;}
   .insert-zone-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .18s;}
@@ -284,7 +299,8 @@
     <button class="btn" onclick="saveProjectLocally()" title="Download .sboard file to disk">⬇ Save locally</button>
     <button class="btn" onclick="triggerLoadProject()" title="Load a .sboard file">📂 Load project</button>
     <input type="file" id="load-project-input" accept=".sboard,.json" style="display:none" onchange="loadProject(event)">
-    <button class="btn" onclick="exportJSON()">⬇ JSON</button>
+    <button class="btn" onclick="exportJSON()">⬇ Save JSON</button>
+    <button class="btn" onclick="copyStoryboardJson()">📋 Copy JSON</button>
     <button class="btn btn-solid" id="export-img-btn" onclick="exportImage()">⬇ Export image</button>
   </div>
 </div>
@@ -292,7 +308,7 @@
 <!-- SETTINGS BAR -->
 <div class="settings-bar hidden" id="settings-bar">
   <div class="sg"><span class="slabel">Title</span><input type="text" id="g-name" class="sinput wm" placeholder="Untitled storyboard" oninput="saveName()"></div>
-  <div class="sg"><span class="slabel">Length</span><input type="text" id="g-len" class="sinput ws" placeholder="e.g. 2:30" oninput="saveGlobal()"></div>
+  <div class="sg"><span class="slabel">Length</span><select id="g-len" class="sinput" onchange="saveGlobal()"><option value="">—</option><option value="1s">1s</option><option value="2s">2s</option><option value="3s">3s</option><option value="4s">4s</option><option value="5s">5s</option><option value="6s">6s</option></select></div>
   <div class="sg">
     <span class="slabel">Aspect ratio</span>
     <select id="g-ratio" class="sinput" onchange="onRatioChange()">
@@ -300,6 +316,10 @@
       <option value="9:16">9×16 — Vertical</option>
       <option value="1:1">1×1 — Square</option>
       <option value="4:5">4×5 — Social portrait</option>
+      <option value="2:3">2×3 — Portrait</option>
+      <option value="3:2">3×2 — Landscape</option>
+      <option value="3:4">3×4 — Portrait</option>
+      <option value="4:3">4×3 — Standard</option>
       <option value="21:9">21×9 — Ultrawide</option>
     </select>
   </div>
@@ -424,7 +444,8 @@
 
 <script>
 /* ── GLOBALS ─────────────────────────────────────────── */
-const RATIO_DEFS={'16:9':{w:16,h:9},'9:16':{w:9,h:16},'1:1':{w:1,h:1},'4:5':{w:4,h:5},'21:9':{w:21,h:9}};
+const RATIO_DEFS={'16:9':{w:16,h:9},'9:16':{w:9,h:16},'1:1':{w:1,h:1},'4:5':{w:4,h:5},'2:3':{w:2,h:3},'3:2':{w:3,h:2},'3:4':{w:3,h:4},'4:3':{w:4,h:3},'21:9':{w:21,h:9}};
+const MOTIONS=['Pan Left','Pan Right','Pan Up','Pan Down','Dolly Left','Dolly Right','Dolly Up','Dolly Down','Zoom In','Zoom Out','Handheld','Orbit Left','Orbit Right','Orbit Up','Orbit Bottom','Handheld Forward','Handheld Backwards','Handheld Left','Handheld Right'];
 function computeRes(ratio,base){
   const r=RATIO_DEFS[ratio]||RATIO_DEFS['16:9'],b=Math.max(480,parseInt(base)||1080);
   let w,h;if(r.w>=r.h){h=b;w=Math.round(b*r.w/r.h);}else{w=b;h=Math.round(b*r.h/r.w);}
@@ -438,7 +459,19 @@ function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').repla
 let boards=[],active=null;
 const imgs={};
 
-function makeShot(label){return{id:Date.now()+Math.random(),label,imgKey:null,locked:false,length:'',motion:'',contents:'',refs:[]};}
+function makeShot(label){return{id:Date.now()+Math.random(),label,imgKey:null,locked:false,length:'',motion:'',motionCustom:'',mediaType:'video',aspectOverride:false,aspectRatio:'16:9',baseOverride:false,basePx:1080,contents:'',refs:[]};}
+
+function ratioOptions(selected){
+  return Object.keys(RATIO_DEFS).map(k=>`<option value="${k}"${k===(selected||'16:9')?' selected':''}>${k.replace(':','×')}</option>`).join('');
+}
+function lengthOptions(selected){
+  return ['','1s','2s','3s','4s','5s','6s'].map(v=>`<option value="${v}"${v===(selected||'')?' selected':''}>${v||'—'}</option>`).join('');
+}
+function motionOptions(selected){
+  const isCustom=selected&&selected!==''&&!MOTIONS.includes(selected);
+  const sel=isCustom?'Custom':(selected||'');
+  return `<option value="">—</option>${MOTIONS.map(m=>`<option value="${m}"${m===sel?' selected':''}>${m}</option>`).join('')}<option value="Custom"${sel==='Custom'?' selected':''}>Custom…</option>`;
+}
 function makeShots(n){return Array.from({length:n},(_,i)=>makeShot(String((i+1)*10).padStart(3,'0')));}
 
 function newBoard(){
@@ -475,7 +508,7 @@ function renderTabs(){
 function delBoard(id){boards=boards.filter(b=>b.id!==id);if(active&&active.id===id){active=null;setActive(null);}else renderTabs();}
 function saveName(){if(!active)return;active.name=document.getElementById('g-name').value;renderTabs();const t=document.getElementById('board-title');if(t)t.value=active.name;}
 function saveGlobal(){if(!active)return;active.global.length=document.getElementById('g-len').value;}
-function onRatioChange(){if(!active)return;active.global.ratio=document.getElementById('g-ratio').value;updateResDisplay();document.querySelectorAll('.frame-wrap').forEach(fw=>{fw.style.aspectRatio=cssAR(active.global.ratio);});}
+function onRatioChange(){if(!active)return;active.global.ratio=document.getElementById('g-ratio').value;updateResDisplay();renderShots();}
 function onBaseChange(){if(!active)return;active.global.base=Math.max(480,parseInt(document.getElementById('g-base').value)||1080);updateResDisplay();}
 function updateResDisplay(){if(!active)return;const{str,badge}=computeRes(active.global.ratio,active.global.base||1080);document.getElementById('res-value').textContent=str;document.getElementById('res-badge').textContent=badge;}
 function adj(id,d,cb){const el=document.getElementById(id),mn=parseInt(el.min)||1,mx=parseInt(el.max)||99;el.value=Math.min(mx,Math.max(mn,(parseInt(el.value)||1)+d));cb();}
@@ -590,7 +623,8 @@ function renderShots(){
   grid.innerHTML=active.shots.map((s,i)=>shotCardHTML(s,i,ar)).join('');
 }
 
-function shotCardHTML(s,i,ar){
+function shotCardHTML(s,i,globalAr){
+  const effectiveAr=(s.aspectOverride&&s.aspectRatio)?cssAR(s.aspectRatio):globalAr;
   const hasFrame=s.imgKey&&imgs[s.imgKey];
   const locked=!!s.locked;
   const refs=s.refs||[];
@@ -600,6 +634,12 @@ function shotCardHTML(s,i,ar){
       <span class="ref-item-label" title="${esc(r.label)}">${esc(r.label)}</span>
       <button class="ref-item-del" onclick="deleteRef(${i},${ri})">✕</button>
     </div>`).join(''):`<div class="ref-empty">No references yet</div>`;
+
+  // Motion: detect legacy custom text (not a preset, not 'Custom', not empty)
+  const isLegacyCustomMotion=s.motion&&s.motion!=='Custom'&&!MOTIONS.includes(s.motion);
+  const motionSelVal=isLegacyCustomMotion?'Custom':(s.motion||'');
+  const motionCustomVal=s.motion==='Custom'?(s.motionCustom||''):(isLegacyCustomMotion?s.motion:(s.motionCustom||''));
+  const showMotionCustom=motionSelVal==='Custom';
 
   return `<div class="shot-card${locked?' locked':''}" id="shot-card-${i}">
     <div class="shot-card-inner">
@@ -612,7 +652,7 @@ function shotCardHTML(s,i,ar){
       </div>
 
       <div class="frame-outer">
-        <div class="frame-wrap" style="aspect-ratio:${ar}">
+        <div class="frame-wrap" style="aspect-ratio:${effectiveAr}">
           <div class="frame-inner" id="fi-${i}">
             ${hasFrame
               ?`<img src="${imgs[s.imgKey]}" alt="">`
@@ -636,9 +676,26 @@ function shotCardHTML(s,i,ar){
         <input type="file" id="frame-file-${i}" accept="image/*" style="display:none" onchange="handleFrameFile(event,${i})">
       </div>
 
+      <div class="shot-override-section">
+        <div class="so-row">
+          <label class="so-check">
+            <input type="checkbox" ${s.aspectOverride?'checked':''} onchange="saveShot(${i},'aspectOverride',this.checked);renderShots()">
+            Override aspect &amp; resolution
+          </label>
+          ${s.aspectOverride?`
+            <select class="so-sel" onchange="saveShot(${i},'aspectRatio',this.value);renderShots()">${ratioOptions(s.aspectRatio)}</select>
+            <input type="number" class="so-num" value="${s.basePx||1080}" min="480" step="1" title="Base px" onchange="saveShot(${i},'basePx',parseInt(this.value)||1080)">
+          `:''}
+        </div>
+      </div>
+
       <div class="shot-fields">
-        <div class="sf"><label>Length</label><input type="text" placeholder="e.g. 3s" value="${esc(s.length)}" oninput="saveShot(${i},'length',this.value)"></div>
-        <div class="sf"><label>Motion</label><input type="text" placeholder="e.g. slow pan" value="${esc(s.motion)}" oninput="saveShot(${i},'motion',this.value)"></div>
+        <div class="sf"><label>Type</label><select onchange="saveShot(${i},'mediaType',this.value)"><option value="video" ${(s.mediaType||'video')==='video'?'selected':''}>Video</option><option value="image" ${s.mediaType==='image'?'selected':''}>Image</option></select></div>
+        <div class="sf"><label>Length</label><select onchange="saveShot(${i},'length',this.value)">${lengthOptions(s.length)}</select></div>
+        <div class="sf sf-full"><label>Motion</label>
+          <select onchange="saveShot(${i},'motion',this.value);if(this.value==='Custom'){saveShot(${i},'motionCustom','')}else{saveShot(${i},'motionCustom','')};renderShots()">${motionOptions(motionSelVal)}</select>
+          ${showMotionCustom?`<div class="sf-motion-custom"><input type="text" placeholder="Describe custom motion…" value="${esc(motionCustomVal)}" oninput="saveShot(${i},'motionCustom',this.value)"></div>`:''}
+        </div>
         <div class="sf sf-full"><label>Contents</label><textarea placeholder="Describe the frame…" oninput="saveShot(${i},'contents',this.value)">${esc(s.contents)}</textarea></div>
         <div class="sf sf-full">
           <div class="ref-block">
@@ -1139,19 +1196,48 @@ document.addEventListener('keydown',e=>{
 });
 
 /* ── JSON EXPORT ─────────────────────────────────── */
-function exportJSON(){
-  if(!active)return;
+function _buildExportJSON(){
   const out=JSON.parse(JSON.stringify(active));
   const{str}=computeRes(active.global.ratio,active.global.base||1080);
   out.global.resolution=str;
   out.shots.forEach(s=>{
     delete s.imgKey;
+    // Resolve effective motion
+    const isLegacyCustom=s.motion&&s.motion!=='Custom'&&!MOTIONS.includes(s.motion);
+    if(s.motion==='Custom'){s.motion=s.motionCustom||'';}
+    else if(isLegacyCustom){/* keep as-is */}
+    delete s.motionCustom;
+    // Resolve effective aspect ratio
+    if(s.aspectOverride&&s.aspectRatio){
+      const{str:shotStr}=computeRes(s.aspectRatio,s.basePx||active.global.base||1080);
+      s.resolution=shotStr;
+    }
     if(s.refs)s.refs=s.refs.map(r=>r.type==='url'?{type:'url',value:r.value}:{type:'img',label:r.label});
   });
+  return out;
+}
+
+function exportJSON(){
+  if(!active)return;
+  const out=_buildExportJSON();
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:'application/json'}));
   a.download=(active.name||'storyboard').replace(/\s+/g,'_')+'.json';
   a.click();
+}
+
+function copyStoryboardJson(){
+  if(!active)return;
+  const json=JSON.stringify(_buildExportJSON(),null,2);
+  const btn=document.querySelector('button[onclick="copyStoryboardJson()"]');
+  const orig=btn?btn.innerHTML:'';
+  navigator.clipboard.writeText(json).then(()=>{
+    if(btn){btn.innerHTML='✓ Copied!';btn.disabled=true;setTimeout(()=>{btn.innerHTML=orig;btn.disabled=false;},1800);}
+  }).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=json;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    if(btn){btn.innerHTML='✓ Copied!';btn.disabled=true;setTimeout(()=>{btn.innerHTML=orig;btn.disabled=false;},1800);}
+  });
 }
 
 /* ── IMAGE EXPORT ────────────────────────────────── */
