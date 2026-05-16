@@ -1331,13 +1331,22 @@ async function downloadAllImages(){
       zip.file('00_storyboard_sheet.png',canvas.toDataURL('image/png').split(',')[1],{base64:true});
     }catch(e){console.warn('Sheet render failed',e);}
 
-    // 2. Individual shot frame images
+    // 2. Individual shot images (frame + reference images)
     active.shots.forEach(s=>{
+      const slug=s.label.replace(/\s+/g,'_');
+      // Frame / thumbnail image
       if(s.imgKey&&imgs[s.imgKey]){
         const dataUrl=imgs[s.imgKey];
         const isJpeg=dataUrl.startsWith('data:image/jpeg')||dataUrl.startsWith('data:image/jpg');
-        zip.file(`shot_${s.label.replace(/\s+/g,'_')}.${isJpeg?'jpg':'png'}`,dataUrl.split(',')[1],{base64:true});
+        zip.file(`shot_${slug}_frame.${isJpeg?'jpg':'png'}`,dataUrl.split(',')[1],{base64:true});
       }
+      // Reference images uploaded to this shot
+      (s.refs||[]).filter(r=>r.type==='img'&&imgs[r.value]).forEach((r,ri)=>{
+        const dataUrl=imgs[r.value];
+        const isJpeg=dataUrl.startsWith('data:image/jpeg')||dataUrl.startsWith('data:image/jpg');
+        const refName=(r.label||('ref'+ri)).replace(/[^a-zA-Z0-9_.-]/g,'_');
+        zip.file(`shot_${slug}_ref_${refName}.${isJpeg?'jpg':'png'}`,dataUrl.split(',')[1],{base64:true});
+      });
     });
 
     const blob=await zip.generateAsync({type:'blob'});
@@ -1382,25 +1391,7 @@ function buildNodeFlow(){
       data:{input_type:'text',input:{text:prompt}},
       style:{width:'296px',height:'151px'},zIndex:2,parentId:null,width:296,height:151,measured:{width:296,height:151}});
 
-    // Frame image as media node (if the shot has an uploaded frame)
-    const mediaIds=[];
-    if(s.imgKey&&imgs[s.imgKey]){
-      const fId=_uid();mediaIds.push(fId);
-      nodes.push({id:fId,type:'media',position:{x:0,y:yBase+200},
-        data:{mediaType:'image',loading:false,url:imgs[s.imgKey],previewUrl:imgs[s.imgKey]},
-        style:{width:'300px',height:'300px'},zIndex:2,parentId:null,width:300,height:300,measured:{width:300,height:300}});
-    }
-
-    // Reference image media nodes
-    (s.refs||[]).filter(r=>r.type==='img'&&imgs[r.value]).forEach((r,j)=>{
-      const mId=_uid();mediaIds.push(mId);
-      const yOff=200+(mediaIds.length-1)*340;
-      nodes.push({id:mId,type:'media',position:{x:0,y:yBase+yOff},
-        data:{mediaType:'image',loading:false,url:imgs[r.value],previewUrl:imgs[r.value]},
-        style:{width:'300px',height:'300px'},zIndex:2,parentId:null,width:300,height:300,measured:{width:300,height:300}});
-    });
-
-    // Image gen node (always present)
+    // Image gen node (always present — no embedded image data; upload assets manually)
     nodes.push({id:imageGenId,type:'generate',position:{x:380,y:yBase},
       data:{generation_type:'imagegen_2_0',input:{text:prompt,aspect_ratio:ar,resolution:'2k',quality:'high',batch_size:1}},
       style:{width:'300px',height:'300px'},zIndex:3,parentId:null,width:300,height:300,measured:{width:300,height:300}});
@@ -1412,18 +1403,14 @@ function buildNodeFlow(){
         style:{width:'300px',height:'300px'},zIndex:4,parentId:null,width:300,height:300,measured:{width:300,height:300}});
     }
 
-    // Edges
+    // Edges: prompt → imageGen, and for video shots: imageGen → videoGen
     edges.push({id:_uid(),source:promptId,sourceHandle:'text',target:imageGenId,targetHandle:'prompt'});
-    mediaIds.forEach(mId=>{
-      edges.push({id:_uid(),source:mId,sourceHandle:'image',target:imageGenId,targetHandle:'input_images'});
-    });
     if(isVideo){
-      // Image gen output → video gen input
       edges.push({id:_uid(),source:imageGenId,sourceHandle:'image',target:videoGenId,targetHandle:'input_images'});
     }
 
     // Advance vertical position for next shot group
-    yBase+=Math.max(900,200+mediaIds.length*340+500);
+    yBase+=900;
   });
 
   return{nodes,edges};
