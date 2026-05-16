@@ -476,7 +476,7 @@ function makeShots(n){return Array.from({length:n},(_,i)=>makeShot(String((i+1)*
 
 function newBoard(){
   const id=Date.now();
-  boards.push({id,name:'Untitled storyboard',global:{length:'',ratio:'16:9',base:1080,shots:6,cols:3},shots:makeShots(6),date:today()});
+  boards.push({id,name:'Untitled storyboard',global:{length:'',ratio:'16:9',base:1080,shots:3,cols:3},shots:makeShots(3),date:today()});
   setActive(id);
 }
 
@@ -1245,19 +1245,17 @@ async function exportImage(){
   if(!active)return;
   const btn=document.getElementById('export-img-btn');
   btn.textContent='Rendering…';btn.disabled=true;
-  const cols=active.global.cols||3,ar=active.global.ratio||'16:9';
-  const[arW,arH]=ar.split(':').map(Number);
-  const{str}=computeRes(ar,active.global.base||1080);
+  const cols=active.global.cols||3,globalAr=active.global.ratio||'16:9';
+  const{str:globalRes}=computeRes(globalAr,active.global.base||1080);
   const SHEET_W=1400,PAD=44,GAP=20;
   const colW=((SHEET_W-PAD*2)-GAP*(cols-1))/cols;
-  const frameH=Math.round(colW*arH/arW);
   const container=document.getElementById('export-canvas');
   const sheet=document.createElement('div');
   sheet.className='export-sheet';sheet.style.width=SHEET_W+'px';
   sheet.innerHTML=`
     <div class="export-header">
       <div class="export-title">${esc(active.name||'Untitled')}</div>
-      <div class="export-meta">Date: ${active.date||today()}<br>Ratio: ${ar} · Resolution: ${str}<br>${active.global.length?'Length: '+esc(active.global.length)+'<br>':''}Shots: ${active.shots.length}</div>
+      <div class="export-meta">Date: ${active.date||today()}<br>Ratio: ${globalAr} · Resolution: ${globalRes}<br>${active.global.length?'Length: '+esc(active.global.length)+'<br>':''}Shots: ${active.shots.length}</div>
     </div>
     <div class="export-grid" style="grid-template-columns:repeat(${cols},1fr);gap:${GAP}px">
       ${active.shots.map(s=>{
@@ -1265,13 +1263,25 @@ async function exportImage(){
         const imgRefs=refs.filter(r=>r.type==='img'&&imgs[r.value]);
         const urlRefs=refs.filter(r=>r.type==='url');
         const hasFrame=s.imgKey&&imgs[s.imgKey];
+        // Per-shot aspect ratio
+        const shotAr=(s.aspectOverride&&s.aspectRatio)?s.aspectRatio:globalAr;
+        const[shotArW,shotArH]=shotAr.split(':').map(Number);
+        const shotFrameH=Math.round(colW*shotArH/shotArW);
+        const shotBase=s.aspectOverride?(s.basePx||active.global.base||1080):(active.global.base||1080);
+        const{str:shotRes}=computeRes(shotAr,shotBase);
+        // Resolve effective motion
+        const isLegacyCustomMotion=s.motion&&s.motion!=='Custom'&&!MOTIONS.includes(s.motion);
+        const effectiveMotion=s.motion==='Custom'?(s.motionCustom||''):(isLegacyCustomMotion?s.motion:s.motion);
+        // Media type label
+        const mediaLabel=(s.mediaType||'video').charAt(0).toUpperCase()+(s.mediaType||'video').slice(1);
         return`<div class="export-shot">
-          <div class="export-shot-num">SHOT ${esc(s.label)}</div>
-          <div class="export-frame" style="height:${frameH}px">
+          <div class="export-shot-num">SHOT ${esc(s.label)}${s.aspectOverride?` · ${shotAr} · ${shotRes}`:''}</div>
+          <div class="export-frame" style="height:${shotFrameH}px">
             ${hasFrame?`<img src="${imgs[s.imgKey]}" style="width:100%;height:100%;object-fit:cover;display:block">`:''}</div>
           <div class="export-fields">
+            <div class="export-field"><div class="export-field-label">Type</div>${esc(mediaLabel)}</div>
             ${s.length?`<div class="export-field"><div class="export-field-label">Length</div>${esc(s.length)}</div>`:''}
-            ${s.motion?`<div class="export-field"><div class="export-field-label">Motion</div>${esc(s.motion)}</div>`:''}
+            ${effectiveMotion?`<div class="export-field"><div class="export-field-label">Motion</div>${esc(effectiveMotion)}</div>`:''}
             ${s.contents?`<div class="export-field" style="grid-column:1/-1"><div class="export-field-label">Contents</div>${esc(s.contents)}</div>`:''}
             ${(imgRefs.length||urlRefs.length)?`<div class="export-field" style="grid-column:1/-1">
               <div class="export-field-label">Reference</div>
