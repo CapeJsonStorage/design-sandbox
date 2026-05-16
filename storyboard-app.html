@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Storyboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
   :root {
@@ -301,7 +302,9 @@
     <input type="file" id="load-project-input" accept=".sboard,.json" style="display:none" onchange="loadProject(event)">
     <button class="btn" onclick="exportJSON()">⬇ Save JSON</button>
     <button class="btn" onclick="copyStoryboardJson()">📋 Copy JSON</button>
+    <button class="btn" onclick="copyNodeFlow()">🔗 Copy node flow</button>
     <button class="btn btn-solid" id="export-img-btn" onclick="exportImage()">⬇ Export image</button>
+    <button class="btn btn-solid" id="dl-images-btn" onclick="downloadAllImages()">⬇ Download images</button>
   </div>
 </div>
 
@@ -1241,15 +1244,11 @@ function copyStoryboardJson(){
 }
 
 /* ── IMAGE EXPORT ────────────────────────────────── */
-async function exportImage(){
-  if(!active)return;
-  const btn=document.getElementById('export-img-btn');
-  btn.textContent='Rendering…';btn.disabled=true;
+function _buildExportSheetEl(){
   const cols=active.global.cols||3,globalAr=active.global.ratio||'16:9';
   const{str:globalRes}=computeRes(globalAr,active.global.base||1080);
   const SHEET_W=1400,PAD=44,GAP=20;
   const colW=((SHEET_W-PAD*2)-GAP*(cols-1))/cols;
-  const container=document.getElementById('export-canvas');
   const sheet=document.createElement('div');
   sheet.className='export-sheet';sheet.style.width=SHEET_W+'px';
   sheet.innerHTML=`
@@ -1263,16 +1262,13 @@ async function exportImage(){
         const imgRefs=refs.filter(r=>r.type==='img'&&imgs[r.value]);
         const urlRefs=refs.filter(r=>r.type==='url');
         const hasFrame=s.imgKey&&imgs[s.imgKey];
-        // Per-shot aspect ratio
         const shotAr=(s.aspectOverride&&s.aspectRatio)?s.aspectRatio:globalAr;
         const[shotArW,shotArH]=shotAr.split(':').map(Number);
         const shotFrameH=Math.round(colW*shotArH/shotArW);
         const shotBase=s.aspectOverride?(s.basePx||active.global.base||1080):(active.global.base||1080);
         const{str:shotRes}=computeRes(shotAr,shotBase);
-        // Resolve effective motion
         const isLegacyCustomMotion=s.motion&&s.motion!=='Custom'&&!MOTIONS.includes(s.motion);
         const effectiveMotion=s.motion==='Custom'?(s.motionCustom||''):(isLegacyCustomMotion?s.motion:s.motion);
-        // Media type label
         const mediaLabel=(s.mediaType||'video').charAt(0).toUpperCase()+(s.mediaType||'video').slice(1);
         return`<div class="export-shot">
           <div class="export-shot-num">SHOT ${esc(s.label)}${s.aspectOverride?` · ${shotAr} · ${shotRes}`:''}</div>
@@ -1292,17 +1288,157 @@ async function exportImage(){
         </div>`;
       }).join('')}
     </div>`;
+  return sheet;
+}
+
+async function _renderSheetToCanvas(){
+  const container=document.getElementById('export-canvas');
+  const sheet=_buildExportSheetEl();
   container.innerHTML='';container.appendChild(sheet);
   await new Promise(r=>setTimeout(r,300));
+  const canvas=await html2canvas(sheet,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false});
+  container.innerHTML='';
+  return canvas;
+}
+
+async function exportImage(){
+  if(!active)return;
+  const btn=document.getElementById('export-img-btn');
+  btn.textContent='Rendering…';btn.disabled=true;
   try{
-    const canvas=await html2canvas(sheet,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false});
+    const canvas=await _renderSheetToCanvas();
     const a=document.createElement('a');
     a.href=canvas.toDataURL('image/png');
     a.download=(active.name||'storyboard').replace(/\s+/g,'_')+'.png';
     a.click();
   }catch(err){alert('Export failed: '+err.message);}
-  container.innerHTML='';
   btn.textContent='⬇ Export image';btn.disabled=false;
+}
+
+/* ── DOWNLOAD ALL IMAGES ─────────────────────────── */
+async function downloadAllImages(){
+  if(!active)return;
+  const btn=document.getElementById('dl-images-btn');
+  const orig=btn.innerHTML;
+  btn.innerHTML='Packaging…';btn.disabled=true;
+  try{
+    const zip=new JSZip();
+    const boardName=(active.name||'storyboard').replace(/\s+/g,'_');
+
+    // 1. Storyboard sheet PNG
+    try{
+      const canvas=await _renderSheetToCanvas();
+      zip.file('00_storyboard_sheet.png',canvas.toDataURL('image/png').split(',')[1],{base64:true});
+    }catch(e){console.warn('Sheet render failed',e);}
+
+    // 2. Individual shot frame images
+    active.shots.forEach(s=>{
+      if(s.imgKey&&imgs[s.imgKey]){
+        const dataUrl=imgs[s.imgKey];
+        const isJpeg=dataUrl.startsWith('data:image/jpeg')||dataUrl.startsWith('data:image/jpg');
+        zip.file(`shot_${s.label.replace(/\s+/g,'_')}.${isJpeg?'jpg':'png'}`,dataUrl.split(',')[1],{base64:true});
+      }
+    });
+
+    const blob=await zip.generateAsync({type:'blob'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=boardName+'_images.zip';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }catch(e){alert('Download failed: '+e.message);}
+  btn.innerHTML=orig;btn.disabled=false;
+}
+
+/* ── NODE FLOW EXPORT ────────────────────────────── */
+function _uid(){return Math.random().toString(36).slice(2)+Date.now().toString(36);}
+
+function buildNodeFlow(){
+  if(!active)return null;
+  const nodes=[],edges=[];
+  const globalAr=active.global.ratio||'16:9';
+  let yBase=300;
+
+  active.shots.forEach(s=>{
+    const ar=(s.aspectOverride&&s.aspectRatio)?s.aspectRatio:globalAr;
+    const isVideo=(s.mediaType||'video')==='video';
+    const prompt=s.contents||'';
+    const isLegacyCustom=s.motion&&s.motion!=='Custom'&&!MOTIONS.includes(s.motion);
+    const effectiveMotion=s.motion==='Custom'?(s.motionCustom||''):(isLegacyCustom?s.motion:s.motion||'');
+    const videoPrompt=[prompt,effectiveMotion].filter(Boolean).join('. ');
+    const durNum=parseInt(s.length)||8;
+
+    // Node IDs
+    const stickyId=_uid(),promptId=_uid(),imageGenId=_uid(),videoGenId=_uid();
+
+    // Sticky note — shot label + metadata
+    const stickyText=['SHOT '+s.label,s.length?'Length: '+s.length:'',effectiveMotion?'Motion: '+effectiveMotion:''].filter(Boolean).join('\n');
+    nodes.push({id:stickyId,type:'stickyNote',position:{x:0,y:yBase-280},
+      data:{text:stickyText,fontSize:14,color:'yellow',input_type:'text',input:{text:stickyText}},
+      style:{width:'300px',height:'200px'},zIndex:1,parentId:null,width:300,height:200,measured:{width:300,height:200}});
+
+    // Prompt node
+    nodes.push({id:promptId,type:'prompt',position:{x:0,y:yBase},
+      data:{input_type:'text',input:{text:prompt}},
+      style:{width:'296px',height:'151px'},zIndex:2,parentId:null,width:296,height:151,measured:{width:296,height:151}});
+
+    // Frame image as media node (if the shot has an uploaded frame)
+    const mediaIds=[];
+    if(s.imgKey&&imgs[s.imgKey]){
+      const fId=_uid();mediaIds.push(fId);
+      nodes.push({id:fId,type:'media',position:{x:0,y:yBase+200},
+        data:{mediaType:'image',loading:false,url:imgs[s.imgKey],previewUrl:imgs[s.imgKey]},
+        style:{width:'300px',height:'300px'},zIndex:2,parentId:null,width:300,height:300,measured:{width:300,height:300}});
+    }
+
+    // Reference image media nodes
+    (s.refs||[]).filter(r=>r.type==='img'&&imgs[r.value]).forEach((r,j)=>{
+      const mId=_uid();mediaIds.push(mId);
+      const yOff=200+(mediaIds.length-1)*340;
+      nodes.push({id:mId,type:'media',position:{x:0,y:yBase+yOff},
+        data:{mediaType:'image',loading:false,url:imgs[r.value],previewUrl:imgs[r.value]},
+        style:{width:'300px',height:'300px'},zIndex:2,parentId:null,width:300,height:300,measured:{width:300,height:300}});
+    });
+
+    // Image gen node (always present)
+    nodes.push({id:imageGenId,type:'generate',position:{x:380,y:yBase},
+      data:{generation_type:'imagegen_2_0',input:{text:prompt,aspect_ratio:ar,resolution:'2k',quality:'high',batch_size:1}},
+      style:{width:'300px',height:'300px'},zIndex:3,parentId:null,width:300,height:300,measured:{width:300,height:300}});
+
+    // Video gen node — only for video shots, fed by image gen output
+    if(isVideo){
+      nodes.push({id:videoGenId,type:'generate',position:{x:760,y:yBase},
+        data:{generation_type:'seedance_2_0',input:{text:videoPrompt,duration:durNum,resolution:'720p',aspect_ratio:ar,generate_audio:false,batch_size:1}},
+        style:{width:'300px',height:'300px'},zIndex:4,parentId:null,width:300,height:300,measured:{width:300,height:300}});
+    }
+
+    // Edges
+    edges.push({id:_uid(),source:promptId,sourceHandle:'text',target:imageGenId,targetHandle:'prompt'});
+    mediaIds.forEach(mId=>{
+      edges.push({id:_uid(),source:mId,sourceHandle:'image',target:imageGenId,targetHandle:'input_images'});
+    });
+    if(isVideo){
+      // Image gen output → video gen input
+      edges.push({id:_uid(),source:imageGenId,sourceHandle:'image',target:videoGenId,targetHandle:'input_images'});
+    }
+
+    // Advance vertical position for next shot group
+    yBase+=Math.max(900,200+mediaIds.length*340+500);
+  });
+
+  return{nodes,edges};
+}
+
+function copyNodeFlow(){
+  if(!active)return;
+  const json=JSON.stringify(buildNodeFlow(),null,2);
+  const btn=document.querySelector('button[onclick="copyNodeFlow()"]');
+  const orig=btn?btn.innerHTML:'';
+  const done=()=>{if(btn){btn.innerHTML='✓ Copied!';btn.disabled=true;setTimeout(()=>{btn.innerHTML=orig;btn.disabled=false;},1800);}};
+  navigator.clipboard.writeText(json).then(done).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=json;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();
+  });
 }
 
 newBoard();
