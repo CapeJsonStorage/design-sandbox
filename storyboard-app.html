@@ -1391,7 +1391,37 @@ function buildNodeFlow(){
       data:{input_type:'text',input:{text:prompt}},
       style:{width:'296px',height:'151px'},zIndex:2,parentId:null,width:296,height:151,measured:{width:296,height:151}});
 
-    // Image gen node (always present — no embedded image data; upload assets manually)
+    // Collect references: frame image + uploaded refs + URL refs
+    // Each gets an empty media placeholder node + a sticky note with its filename/URL
+    const mediaRefs=[];
+    if(s.imgKey&&imgs[s.imgKey]){
+      mediaRefs.push({mediaUrl:'',noteText:'Frame image'});
+    }
+    (s.refs||[]).forEach(r=>{
+      if(r.type==='img'&&imgs[r.value]){
+        mediaRefs.push({mediaUrl:'',noteText:'Upload: '+(r.label||'reference image')});
+      } else if(r.type==='url'&&r.value){
+        // URL refs can carry the actual URL so Higgsfield may resolve it directly
+        mediaRefs.push({mediaUrl:r.value,noteText:'Link: '+r.value});
+      }
+    });
+
+    const mediaIds=[];
+    mediaRefs.forEach((ref,mi)=>{
+      const mId=_uid(),infoId=_uid();
+      mediaIds.push(mId);
+      const yOff=200+mi*440;
+      // Media placeholder — no embedded base64; fill in manually
+      nodes.push({id:mId,type:'media',position:{x:0,y:yBase+yOff},
+        data:{mediaType:'image',loading:false,url:ref.mediaUrl,previewUrl:ref.mediaUrl},
+        style:{width:'300px',height:'300px'},zIndex:2,parentId:null,width:300,height:300,measured:{width:300,height:300}});
+      // Info sticky directly below the placeholder
+      nodes.push({id:infoId,type:'stickyNote',position:{x:0,y:yBase+yOff+320},
+        data:{text:ref.noteText,fontSize:12,color:'blue',input_type:'text',input:{text:ref.noteText}},
+        style:{width:'300px',height:'100px'},zIndex:2,parentId:null,width:300,height:100,measured:{width:300,height:100}});
+    });
+
+    // Image gen node (always present)
     nodes.push({id:imageGenId,type:'generate',position:{x:380,y:yBase},
       data:{generation_type:'imagegen_2_0',input:{text:prompt,aspect_ratio:ar,resolution:'2k',quality:'high',batch_size:1}},
       style:{width:'300px',height:'300px'},zIndex:3,parentId:null,width:300,height:300,measured:{width:300,height:300}});
@@ -1403,14 +1433,17 @@ function buildNodeFlow(){
         style:{width:'300px',height:'300px'},zIndex:4,parentId:null,width:300,height:300,measured:{width:300,height:300}});
     }
 
-    // Edges: prompt → imageGen, and for video shots: imageGen → videoGen
+    // Edges
     edges.push({id:_uid(),source:promptId,sourceHandle:'text',target:imageGenId,targetHandle:'prompt'});
+    mediaIds.forEach(mId=>{
+      edges.push({id:_uid(),source:mId,sourceHandle:'image',target:imageGenId,targetHandle:'input_images'});
+    });
     if(isVideo){
       edges.push({id:_uid(),source:imageGenId,sourceHandle:'image',target:videoGenId,targetHandle:'input_images'});
     }
 
     // Advance vertical position for next shot group
-    yBase+=900;
+    yBase+=Math.max(900,200+mediaRefs.length*440+500);
   });
 
   return{nodes,edges};
