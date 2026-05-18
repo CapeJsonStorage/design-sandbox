@@ -77,7 +77,7 @@
 
   /* ── Frame area ── */
   .frame-outer { }
-  .frame-wrap { border: 2px solid var(--border-strong); border-radius: 4px; background: var(--surface2); overflow: hidden; position: relative; aspect-ratio: 16/9; }
+  .frame-wrap { border: 2px solid var(--border-strong); border-radius: 4px; background: var(--surface2); overflow: hidden; position: relative; }
   .frame-inner { width: 100%; height: 100%; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
   .frame-inner img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .frame-placeholder { display: flex; flex-direction: column; align-items: center; gap: 5px; color: var(--text-faint); font-size: 11px; pointer-events: none; }
@@ -132,6 +132,50 @@
 
   /* ── Error ── */
   .err-bar { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.3); border-radius: var(--radius); padding: 10px 14px; color: #fca5a5; font-size: 13px; margin-bottom: 16px; display: none; }
+
+  /* ── Override resolution ── */
+  .override-wrap { margin-top: 6px; }
+  .override-check-row { display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+  .override-check-row input[type=checkbox] { accent-color: var(--accent); cursor: pointer; width: 13px; height: 13px; flex-shrink: 0; }
+  .override-check-row span { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
+  .override-fields { display: flex; gap: 5px; margin-top: 5px; }
+  .override-fields select, .override-fields input[type=number] {
+    flex: 1; padding: 4px 7px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text); font-family: inherit; font-size: 12px; outline: none;
+    transition: border-color .12s;
+  }
+  .override-fields select:focus, .override-fields input[type=number]:focus { border-color: var(--accent); }
+  .override-fields select { appearance: none; padding-right: 22px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M1 3l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; cursor: pointer; }
+  .override-res-badge { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+  .override-res-badge strong { color: var(--accent); font-weight: 700; }
+
+  /* ── Sketch overlay ── */
+  .sketch-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.82); display: flex; align-items: center; justify-content: center; }
+  .sketch-modal { background: var(--surface); border: 1px solid var(--border-strong); border-radius: 12px; display: flex; flex-direction: column; max-height: 96vh; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,.6); }
+  .sketch-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--border); gap: 12px; }
+  .sketch-head-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .sketch-head-btns { display: flex; gap: 5px; }
+  .sketch-head-btn { height: 28px; padding: 0 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface2); color: var(--text); font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all .1s; white-space: nowrap; }
+  .sketch-head-btn:hover { background: var(--border-strong); }
+  .sketch-head-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .sketch-head-btn.primary:hover { opacity: .85; }
+  .sketch-toolbar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .sketch-tool-group { display: flex; align-items: center; gap: 3px; }
+  .sk-btn { height: 28px; min-width: 28px; padding: 0 8px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface2); color: var(--text-muted); font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; transition: all .1s; }
+  .sk-btn:hover { background: var(--border); color: var(--text); }
+  .sk-btn.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(99,102,241,.5); }
+  .sk-sep { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
+  .sk-color { width: 22px; height: 22px; border-radius: 4px; border: 2px solid transparent; cursor: pointer; transition: border-color .1s, transform .1s; flex-shrink: 0; }
+  .sk-color:hover { transform: scale(1.15); }
+  .sk-color.active { border-color: #fff; box-shadow: 0 0 0 1px var(--border-strong); }
+  .sk-color-custom { width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--border); cursor: pointer; overflow: hidden; flex-shrink: 0; padding: 0; }
+  .sketch-canvas-wrap { overflow: auto; flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 12px; background: var(--bg); position: relative; }
+  #sketch-canvas { display: block; cursor: crosshair; box-shadow: 0 0 0 1px var(--border-strong); }
+  .sk-text-overlay { position: absolute; background: var(--surface); border: 1px solid var(--accent); border-radius: var(--radius); padding: 6px; display: flex; gap: 6px; box-shadow: 0 4px 20px rgba(0,0,0,.5); z-index: 10; }
+  .sk-text-overlay input { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: inherit; font-size: 13px; padding: 4px 8px; outline: none; min-width: 160px; }
+  .sk-text-overlay input:focus { border-color: var(--accent); }
+  .sk-text-overlay button { height: 28px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface2); color: var(--text); font-size: 11px; cursor: pointer; font-family: inherit; transition: all .1s; }
+  .sk-text-overlay button:hover { background: var(--border); }
 </style>
 </head>
 <body>
@@ -186,6 +230,61 @@
   </div>
 </div>
 
+<!-- ── Sketch overlay ── -->
+<div class="sketch-overlay" id="sketch-overlay" style="display:none" onclick="_sketchOverlayClick(event)">
+  <div class="sketch-modal" onclick="event.stopPropagation()">
+    <div class="sketch-head">
+      <span class="sketch-head-title">Sketch Frame</span>
+      <div class="sketch-head-btns">
+        <button class="sketch-head-btn" onclick="sketchUndo()">↩ Undo</button>
+        <button class="sketch-head-btn" onclick="sketchClear()">Clear</button>
+        <button class="sketch-head-btn" onclick="closeSketch()">Cancel</button>
+        <button class="sketch-head-btn primary" onclick="saveSketch()">Save Frame</button>
+      </div>
+    </div>
+    <div class="sketch-toolbar">
+      <div class="sketch-tool-group">
+        <button class="sk-btn active" id="sk-tool-pen"    onclick="setTool('pen')"    title="Pen">✏</button>
+        <button class="sk-btn"        id="sk-tool-eraser" onclick="setTool('eraser')" title="Eraser">⌫</button>
+        <button class="sk-btn"        id="sk-tool-line"   onclick="setTool('line')"   title="Line">╱</button>
+        <button class="sk-btn"        id="sk-tool-rect"   onclick="setTool('rect')"   title="Rectangle">▭</button>
+        <button class="sk-btn"        id="sk-tool-text"   onclick="setTool('text')"   title="Text">T</button>
+      </div>
+      <div class="sk-sep"></div>
+      <div class="sketch-tool-group">
+        <button class="sk-btn"        id="sk-sz-1" onclick="setSize(1,this)"  title="Thin" style="font-size:8px;letter-spacing:0">―</button>
+        <button class="sk-btn active" id="sk-sz-2" onclick="setSize(2,this)"  title="Medium">—</button>
+        <button class="sk-btn"        id="sk-sz-4" onclick="setSize(4,this)"  title="Thick" style="font-size:15px">—</button>
+        <button class="sk-btn"        id="sk-sz-8" onclick="setSize(8,this)"  title="X-Thick" style="font-size:20px">━</button>
+      </div>
+      <div class="sk-sep"></div>
+      <div class="sketch-tool-group" style="gap:4px;">
+        <div class="sk-color active" style="background:#1a1a18" onclick="setColor('#1a1a18',this)" title="Black"></div>
+        <div class="sk-color"        style="background:#ffffff" onclick="setColor('#ffffff',this)" title="White"></div>
+        <div class="sk-color"        style="background:#ef4444" onclick="setColor('#ef4444',this)" title="Red"></div>
+        <div class="sk-color"        style="background:#3b82f6" onclick="setColor('#3b82f6',this)" title="Blue"></div>
+        <div class="sk-color"        style="background:#22c55e" onclick="setColor('#22c55e',this)" title="Green"></div>
+        <div class="sk-color"        style="background:#f59e0b" onclick="setColor('#f59e0b',this)" title="Amber"></div>
+        <div class="sk-color"        style="background:#a855f7" onclick="setColor('#a855f7',this)" title="Purple"></div>
+        <input type="color" class="sk-color-custom" value="#1a1a18" oninput="setCustomColor(this.value)" title="Custom colour">
+      </div>
+    </div>
+    <div class="sketch-canvas-wrap" id="sketch-canvas-wrap">
+      <canvas id="sketch-canvas"
+        onmousedown="sketchStart(event)" onmousemove="sketchMove(event)"
+        onmouseup="sketchEnd()"          onmouseleave="sketchLeave()"
+        ontouchstart="sketchStart(event)" ontouchmove="sketchMove(event)" ontouchend="sketchEnd()">
+      </canvas>
+      <div class="sk-text-overlay" id="sk-text-overlay" style="display:none">
+        <input type="text" id="sk-text-val" placeholder="Type text…"
+          onkeydown="if(event.key==='Enter')commitTextInput();else if(event.key==='Escape')cancelTextInput()">
+        <button onclick="commitTextInput()">Add</button>
+        <button onclick="cancelTextInput()">✕</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 const W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
 const MOTIONS = ['Pan Left','Pan Right','Pan Up','Pan Down','Dolly Left','Dolly Right',
@@ -203,6 +302,56 @@ let _seq = 0;
 function uid()    { return (++_seq) + '_' + Math.random().toString(36).slice(2); }
 function esc(s)   { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function now()    { return new Date().toISOString(); }
+
+// ── Ratio / resolution helpers ────────────────────────────────────
+const RATIO_DEFS = {
+  '16:9':{w:16,h:9}, '9:16':{w:9,h:16}, '1:1':{w:1,h:1},
+  '4:5':{w:4,h:5},   '2:3':{w:2,h:3},   '3:2':{w:3,h:2},
+  '3:4':{w:3,h:4},   '4:3':{w:4,h:3},   '21:9':{w:21,h:9}
+};
+const SKETCH_W = 960;
+
+function cssAR(ratio) { const r = RATIO_DEFS[ratio] || RATIO_DEFS['16:9']; return r.w + '/' + r.h; }
+
+function _kreaDims(ratio, basePx) {
+  const r = RATIO_DEFS[ratio] || RATIO_DEFS['1:1'];
+  const b = parseInt(basePx) || 1024;
+  if (r.w > r.h) return { w: Math.round(b * r.w / r.h), h: b };
+  if (r.h > r.w) return { w: b, h: Math.round(b * r.h / r.w) };
+  return { w: b, h: b };
+}
+
+function computeRes(ratio, basePx) {
+  const d = _kreaDims(ratio, basePx);
+  const str = d.w + '×' + d.h;
+  const long = Math.max(d.w, d.h);
+  const badge = long >= 3840 ? '4K' : long >= 2560 ? '1440p' : long >= 1920 ? '1080p' : '720p';
+  return { str, badge };
+}
+
+function ratioOptions(sel) {
+  return Object.keys(RATIO_DEFS).map(k =>
+    `<option value="${k}"${k===(sel||'16:9')?' selected':''}>${k}</option>`).join('');
+}
+
+function _hfResolution(basePx) {
+  const b = parseInt(basePx) || 1080;
+  return b >= 2160 ? '4k' : '2k';
+}
+
+function _vidResolution(basePx) {
+  const b = parseInt(basePx) || 1080;
+  return b >= 2160 ? '2160p' : b >= 1080 ? '1080p' : '720p';
+}
+
+// ── Sketch globals ────────────────────────────────────────────────
+let sketchBlockId   = null;
+let sketchTool      = 'pen', sketchColor = '#1a1a18', sketchSize = 2;
+let sketchDrawing   = false, sketchLastX = 0, sketchLastY = 0;
+let sketchHistory   = [];
+let lineStartX = 0, lineStartY = 0, lineSnapshotData = null;
+let rectStartX = 0, rectStartY = 0, rectSnapshotData = null;
+let textActive = false, textCanvasX = 0, textCanvasY = 0;
 
 // ── Dropzone ──────────────────────────────────────────────────────
 const dz = document.getElementById('dropzone');
@@ -339,6 +488,8 @@ function blockCardHTML(block, n) {
   const hasFrame = block.imgKey && blockImgs[block.imgKey];
   const refs     = block.refs || [];
   const motion   = block.motion || '';
+  const effRatio = block.aspectOverride ? (block.aspectRatio || '16:9') : '16:9';
+  const effBase  = block.aspectOverride ? (block.basePx || 1080) : 1080;
 
   // Motion options
   const motionOpts = `<option value="">— None —</option>${MOTIONS.map(m =>
@@ -355,6 +506,9 @@ function blockCardHTML(block, n) {
       <button class="ref-item-del" onclick="_deleteRef('${id}',${ri})">✕</button>
     </div>`).join('') : `<div class="ref-empty">No references yet</div>`;
 
+  // Override resolution badge
+  const res = computeRes(effRatio, effBase);
+
   return `<div class="block-card" data-id="${id}">
     <div class="block-header">
       <span class="block-num">Design Block ${n}</span>
@@ -369,7 +523,7 @@ function blockCardHTML(block, n) {
 
     <div class="block-body">
       <div class="frame-outer">
-        <div class="frame-wrap">
+        <div class="frame-wrap" style="aspect-ratio:${cssAR(effRatio)}">
           <div class="frame-inner">
             ${hasFrame
               ? `<img src="${blockImgs[block.imgKey]}" alt="">`
@@ -383,6 +537,10 @@ function blockCardHTML(block, n) {
           <button class="frame-btn" onclick="_triggerFrame('${id}')">
             <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 8V2M3 5l3-3 3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M1 9v1a1 1 0 001 1h8a1 1 0 001-1V9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
             Upload frame
+          </button>
+          <button class="frame-btn" onclick="openSketch('${id}')">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M9 1.5l1.5 1.5L3 10.5 1 11l.5-2L9 1.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Sketch
           </button>
           ${hasFrame ? `<button class="frame-btn clear-btn" onclick="_clearFrame('${id}')">Clear</button>` : ''}
         </div>
@@ -417,6 +575,21 @@ function blockCardHTML(block, n) {
           </div>
           <input type="file" id="ref-fi-${id}" accept="image/*" multiple style="display:none">
         </div>
+        <div class="bf bf-full">
+          <div class="override-wrap">
+            <label class="override-check-row">
+              <input type="checkbox" ${block.aspectOverride ? 'checked' : ''} onchange="_toggleOverride('${id}',this.checked)">
+              <span>Override aspect &amp; resolution</span>
+            </label>
+            ${block.aspectOverride ? `
+            <div class="override-fields">
+              <select onchange="_updRatio('${id}',this.value)">${ratioOptions(effRatio)}</select>
+              <input type="number" min="360" max="4320" step="120" value="${effBase}" placeholder="Base px" onchange="_updBasePx('${id}',this.value)">
+            </div>
+            <div class="override-res-badge">${res.str} &nbsp;<strong>${res.badge}</strong></div>
+            ` : ''}
+          </div>
+        </div>
       </div>
     </div>
   </div>`;
@@ -441,8 +614,29 @@ function _delBlock(id) {
   renderDocView();
 }
 
+function _toggleOverride(id, on) {
+  const b = docBlocks.find(b => b._id === id);
+  if (!b) return;
+  b.aspectOverride = on;
+  if (on && !b.aspectRatio) b.aspectRatio = '16:9';
+  if (on && !b.basePx)      b.basePx = 1080;
+  rerenderBlock(id);
+}
+
+function _updRatio(id, val) {
+  const b = docBlocks.find(b => b._id === id);
+  if (b) { b.aspectRatio = val; rerenderBlock(id); }
+}
+
+function _updBasePx(id, val) {
+  const b = docBlocks.find(b => b._id === id);
+  if (b) { b.basePx = parseInt(val) || 1080; rerenderBlock(id); }
+}
+
 function addBlock(afterIdx) {
-  const block = { afterIdx, type: 'Still', description: '', motion: '', motionCustom: '', imgKey: null, refs: [], _id: uid() };
+  const block = { afterIdx, type: 'Still', description: '', motion: '', motionCustom: '',
+    aspectOverride: false, aspectRatio: '16:9', basePx: 1080,
+    imgKey: null, frameName: null, refs: [], _id: uid() };
   docBlocks.push(block);
   renderDocView();
   setTimeout(() => {
@@ -467,6 +661,7 @@ function handleFrameFile(e, id) {
     const key = 'frame_' + uid();
     blockImgs[key] = ev.target.result;
     b.imgKey = key;
+    b.frameName = file.name;
     rerenderBlock(id);
   };
   reader.readAsDataURL(file);
@@ -508,6 +703,228 @@ function _addRefUrl(id) {
 function _deleteRef(id, ri) {
   const b = docBlocks.find(b => b._id === id);
   if (b) { b.refs.splice(ri, 1); rerenderBlock(id); }
+}
+
+// ── Sketch ────────────────────────────────────────────────────────
+function openSketch(id) {
+  sketchBlockId = id;
+  const b = docBlocks.find(b => b._id === id);
+  const ratio = b && b.aspectOverride ? (b.aspectRatio || '16:9') : '16:9';
+  const r     = RATIO_DEFS[ratio] || RATIO_DEFS['16:9'];
+  const cw    = SKETCH_W, ch = Math.round(SKETCH_W * r.h / r.w);
+  const canvas = document.getElementById('sketch-canvas');
+  canvas.width = cw; canvas.height = ch;
+  sketchHistory = [];
+  textActive = false;
+  document.getElementById('sk-text-overlay').style.display = 'none';
+
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, cw, ch);
+
+  if (b && b.imgKey && blockImgs[b.imgKey]) {
+    const img = new Image();
+    img.onload = () => { ctx.drawImage(img, 0, 0, cw, ch); pushHistory(ctx, cw, ch); };
+    img.src = blockImgs[b.imgKey];
+  } else {
+    pushHistory(ctx, cw, ch);
+  }
+
+  document.getElementById('sketch-overlay').style.display = 'flex';
+
+  // Reset toolbar state
+  document.querySelectorAll('[id^="sk-tool-"]').forEach(el => el.classList.remove('active'));
+  document.getElementById('sk-tool-pen').classList.add('active');
+  document.querySelectorAll('[id^="sk-sz-"]').forEach(el => el.classList.remove('active'));
+  document.getElementById('sk-sz-2').classList.add('active');
+  sketchTool = 'pen'; sketchSize = 2; sketchColor = '#1a1a18';
+  document.querySelectorAll('.sk-color').forEach(el => el.classList.remove('active'));
+  const firstColor = document.querySelector('.sk-color');
+  if (firstColor) firstColor.classList.add('active');
+  if (canvas) canvas.style.cursor = 'crosshair';
+}
+
+function closeSketch() {
+  document.getElementById('sketch-overlay').style.display = 'none';
+  sketchBlockId = null;
+  sketchHistory = [];
+  sketchDrawing = false;
+  lineSnapshotData = null; rectSnapshotData = null;
+  textActive = false;
+  document.getElementById('sk-text-overlay').style.display = 'none';
+}
+
+function _sketchOverlayClick(e) {
+  if (e.target === document.getElementById('sketch-overlay')) closeSketch();
+}
+
+function getCanvasPos(e) {
+  const canvas = document.getElementById('sketch-canvas');
+  const rect   = canvas.getBoundingClientRect();
+  const src    = e.touches ? e.touches[0] : e;
+  return {
+    x: (src.clientX - rect.left) * (canvas.width  / rect.width),
+    y: (src.clientY - rect.top)  * (canvas.height / rect.height)
+  };
+}
+
+function pushHistory(ctx, w, h) {
+  sketchHistory.push(ctx.getImageData(0, 0, w, h));
+  if (sketchHistory.length > 40) sketchHistory.shift();
+}
+
+function sketchUndo() {
+  if (sketchHistory.length < 2) return;
+  sketchHistory.pop();
+  const canvas = document.getElementById('sketch-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.putImageData(sketchHistory[sketchHistory.length - 1], 0, 0);
+}
+
+function sketchClear() {
+  const canvas = document.getElementById('sketch-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  pushHistory(ctx, canvas.width, canvas.height);
+}
+
+function saveSketch() {
+  if (!sketchBlockId) return;
+  commitTextInput();
+  const canvas = document.getElementById('sketch-canvas');
+  const dataURL = canvas.toDataURL('image/png');
+  const key = 'sketch_' + uid();
+  blockImgs[key] = dataURL;
+  const b = docBlocks.find(b => b._id === sketchBlockId);
+  if (b) { b.imgKey = key; b.frameName = 'sketch.png'; }
+  closeSketch();
+  rerenderBlock(sketchBlockId);
+}
+
+function sketchStart(e) {
+  e.preventDefault();
+  if (sketchTool === 'text') { openTextInput(e); return; }
+  const canvas = document.getElementById('sketch-canvas');
+  const ctx    = canvas.getContext('2d');
+  const pos    = getCanvasPos(e);
+  sketchDrawing = true;
+  sketchLastX   = pos.x; sketchLastY = pos.y;
+  if (sketchTool === 'line') {
+    lineStartX = pos.x; lineStartY = pos.y;
+    lineSnapshotData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  } else if (sketchTool === 'rect') {
+    rectStartX = pos.x; rectStartY = pos.y;
+    rectSnapshotData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  } else {
+    ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
+  }
+}
+
+function sketchMove(e) {
+  e.preventDefault();
+  if (!sketchDrawing) return;
+  const canvas = document.getElementById('sketch-canvas');
+  const ctx    = canvas.getContext('2d');
+  const pos    = getCanvasPos(e);
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.globalCompositeOperation = 'source-over';
+
+  if (sketchTool === 'pen') {
+    ctx.strokeStyle = sketchColor; ctx.lineWidth = sketchSize;
+    ctx.lineTo(pos.x, pos.y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
+  } else if (sketchTool === 'eraser') {
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = sketchSize * 6;
+    ctx.lineTo(pos.x, pos.y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
+  } else if (sketchTool === 'line' && lineSnapshotData) {
+    ctx.putImageData(lineSnapshotData, 0, 0);
+    ctx.strokeStyle = sketchColor; ctx.lineWidth = sketchSize;
+    ctx.beginPath(); ctx.moveTo(lineStartX, lineStartY); ctx.lineTo(pos.x, pos.y); ctx.stroke();
+  } else if (sketchTool === 'rect' && rectSnapshotData) {
+    ctx.putImageData(rectSnapshotData, 0, 0);
+    ctx.strokeStyle = sketchColor; ctx.lineWidth = sketchSize;
+    ctx.strokeRect(rectStartX, rectStartY, pos.x - rectStartX, pos.y - rectStartY);
+  }
+  sketchLastX = pos.x; sketchLastY = pos.y;
+}
+
+function sketchEnd() {
+  if (!sketchDrawing) return;
+  sketchDrawing = false;
+  lineSnapshotData = null; rectSnapshotData = null;
+  const canvas = document.getElementById('sketch-canvas');
+  const ctx    = canvas.getContext('2d');
+  ctx.globalCompositeOperation = 'source-over';
+  pushHistory(ctx, canvas.width, canvas.height);
+}
+
+function sketchLeave() { if (sketchDrawing) sketchEnd(); }
+
+function openTextInput(e) {
+  const canvas  = document.getElementById('sketch-canvas');
+  const pos     = getCanvasPos(e);
+  textActive    = true; textCanvasX = pos.x; textCanvasY = pos.y;
+  const rect    = canvas.getBoundingClientRect();
+  const wrap    = document.getElementById('sketch-canvas-wrap');
+  const wrapR   = wrap.getBoundingClientRect();
+  const scaleX  = rect.width  / canvas.width;
+  const scaleY  = rect.height / canvas.height;
+  const ov      = document.getElementById('sk-text-overlay');
+  ov.style.left = (rect.left - wrapR.left + pos.x * scaleX) + 'px';
+  ov.style.top  = (rect.top  - wrapR.top  + pos.y * scaleY) + 'px';
+  ov.style.display = 'flex';
+  const inp = document.getElementById('sk-text-val');
+  inp.value = ''; inp.focus();
+}
+
+function commitTextInput() {
+  if (!textActive) return;
+  const val = (document.getElementById('sk-text-val').value || '').trim();
+  if (val) {
+    const canvas = document.getElementById('sketch-canvas');
+    const ctx    = canvas.getContext('2d');
+    const fs     = Math.max(16, sketchSize * 8);
+    ctx.font = `${fs}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+    ctx.fillStyle = sketchColor;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillText(val, textCanvasX, textCanvasY);
+    pushHistory(ctx, canvas.width, canvas.height);
+  }
+  cancelTextInput();
+}
+
+function cancelTextInput() {
+  textActive = false;
+  document.getElementById('sk-text-overlay').style.display = 'none';
+  document.getElementById('sk-text-val').value = '';
+}
+
+function setTool(t) {
+  sketchTool = t;
+  document.querySelectorAll('[id^="sk-tool-"]').forEach(el => el.classList.remove('active'));
+  const btn = document.getElementById('sk-tool-' + t);
+  if (btn) btn.classList.add('active');
+  const canvas = document.getElementById('sketch-canvas');
+  if (canvas) canvas.style.cursor = t === 'text' ? 'text' : t === 'eraser' ? 'cell' : 'crosshair';
+}
+
+function setSize(s, btn) {
+  sketchSize = s;
+  document.querySelectorAll('[id^="sk-sz-"]').forEach(el => el.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+function setColor(c, el) {
+  sketchColor = c;
+  document.querySelectorAll('.sk-color').forEach(el2 => el2.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function setCustomColor(val) {
+  sketchColor = val;
+  document.querySelectorAll('.sk-color').forEach(el => el.classList.remove('active'));
 }
 
 // ── Generate modified .docx ───────────────────────────────────────
@@ -652,26 +1069,33 @@ function buildHighsfieldProject(blocks, projectName) {
   const ROW_GAP_Y = 1400;
 
   blocks.forEach((block, i) => {
-    const iv     = (block.type || '').toLowerCase() === 'video';
-    const prompt = block.description || '';
-    const yBase  = i * ROW_GAP_Y;
-    const refs   = (block.refs || []);
-    const urlRefs = refs.filter(r => r.type === 'url').map(r => r.value);
-    const imgRefs = refs.filter(r => r.type === 'img' && blockImgs[r.value]);
+    const iv       = (block.type || '').toLowerCase() === 'video';
+    const prompt   = block.description || '';
+    const yBase    = i * ROW_GAP_Y;
+    const refs     = (block.refs || []);
+    const urlRefs  = refs.filter(r => r.type === 'url').map(r => r.value);
+    const imgRefs  = refs.filter(r => r.type === 'img' && blockImgs[r.value]);
+    const effRatio = block.aspectOverride ? (block.aspectRatio || '16:9') : '16:9';
+    const effBase  = block.aspectOverride ? (block.basePx  || 1080)  : 1080;
+    const hfRes    = _hfResolution(effBase);
+    const hfVidRes = _vidResolution(effBase);
 
-    // Sticky note
-    const stickyId   = uid();
-    const stickyParts = [];
+    // Sticky note — includes frame/ref file names so user knows what to upload
+    const stickyParts = ['DESIGN ' + (i + 1)];
+    if (block.imgKey && blockImgs[block.imgKey]) {
+      stickyParts.push('Frame: ' + (block.frameName || 'frame.png') + '\n→ upload to frame media node');
+    }
     if (urlRefs.length)  stickyParts.push('Ref URLs:\n' + urlRefs.join('\n'));
-    if (imgRefs.length)  stickyParts.push('Images: ' + imgRefs.map(r => r.label).join(', '));
-    const stickyText = stickyParts.join('\n\n') || ('DESIGN ' + (i + 1));
+    if (imgRefs.length)  stickyParts.push('Ref images:\n' + imgRefs.map(r => r.label || 'image').join('\n') + '\n→ upload to ref media nodes');
+    const stickyText = stickyParts.join('\n\n');
 
+    const stickyId = uid();
     nodes.push({
       id: stickyId, type: 'stickyNote',
-      position: { x: 0, y: yBase - 280 },
-      data: { text: stickyText, fontSize: 20, color: '#fef3c7', input_type: 'text', input: { text: stickyText } },
-      style: { width: 300, height: 200 }, zIndex: 1, parentId: null,
-      width: 300, height: 200, measured: { width: 300, height: 200 }
+      position: { x: 0, y: yBase - 300 },
+      data: { text: stickyText, fontSize: 18, color: '#fef3c7', input_type: 'text', input: { text: stickyText } },
+      style: { width: 320, height: 220 }, zIndex: 1, parentId: null,
+      width: 320, height: 220, measured: { width: 320, height: 220 }
     });
 
     // Prompt node
@@ -684,53 +1108,49 @@ function buildHighsfieldProject(blocks, projectName) {
       width: 296, height: 151, measured: { width: 296, height: 151 }
     });
 
-    // Frame image node (if uploaded)
+    // Frame media node (placeholder — no embedded image data)
+    let frameMediaId = null;
     if (block.imgKey && blockImgs[block.imgKey]) {
-      const frameId = uid();
+      frameMediaId = uid();
       nodes.push({
-        id: frameId, type: 'media',
+        id: frameMediaId, type: 'media',
         position: { x: 0, y: yBase + 200 },
-        data: { mediaType: 'image', loading: false, url: blockImgs[block.imgKey], previewUrl: blockImgs[block.imgKey] },
+        data: { mediaType: 'image', loading: false, url: '', previewUrl: '' },
         style: { width: 300, height: 300 }, zIndex: 2, parentId: null,
         width: 300, height: 300, measured: { width: 300, height: 300 }
       });
-      // frame → image gen (will be added after imgGenId is created)
-      nodes._frameId = frameId; // temp stash
     }
 
-    // Ref image media nodes
+    // Ref image media nodes (placeholder — no embedded image data)
     const mediaIds = imgRefs.map((r, j) => {
       const mediaId = uid();
       nodes.push({
         id: mediaId, type: 'media',
-        position: { x: 0, y: yBase + 200 + (block.imgKey && blockImgs[block.imgKey] ? 340 : 0) + j * 340 },
-        data: { mediaType: 'image', loading: false, url: blockImgs[r.value], previewUrl: blockImgs[r.value] },
+        position: { x: 0, y: yBase + 200 + (frameMediaId ? 340 : 0) + j * 340 },
+        data: { mediaType: 'image', loading: false, url: '', previewUrl: '' },
         style: { width: 300, height: 300 }, zIndex: 2, parentId: null,
         width: 300, height: 300, measured: { width: 300, height: 300 }
       });
       return mediaId;
     });
 
-    // Image generate node
+    // Image generate node — uses override aspect ratio + resolution
     const imgGenId = uid();
     nodes.push({
       id: imgGenId, type: 'generate',
       position: { x: 380, y: yBase },
       data: { generation_type: 'imagegen_2_0',
-              input: { text: prompt, aspect_ratio: '16:9', resolution: '2k', quality: 'high', batch_size: 1 } },
+              input: { text: prompt, aspect_ratio: effRatio, resolution: hfRes, quality: 'high', batch_size: 1 } },
       style: { width: 300, height: 300 }, zIndex: 3, parentId: null,
       width: 300, height: 300, measured: { width: 300, height: 300 }
     });
 
     // prompt → image gen
-    edges.push({ id: uid(), source: promptId, sourceHandle: 'text', target: imgGenId, targetHandle: 'prompt' });
-
+    edges.push({ id: uid(), source: promptId,    sourceHandle: 'text',  target: imgGenId, targetHandle: 'prompt' });
     // frame → image gen
-    if (nodes._frameId) {
-      edges.push({ id: uid(), source: nodes._frameId, sourceHandle: 'image', target: imgGenId, targetHandle: 'input_images' });
-      delete nodes._frameId;
+    if (frameMediaId) {
+      edges.push({ id: uid(), source: frameMediaId, sourceHandle: 'image', target: imgGenId, targetHandle: 'input_images' });
     }
-
     // ref media → image gen
     mediaIds.forEach(mid => {
       edges.push({ id: uid(), source: mid, sourceHandle: 'image', target: imgGenId, targetHandle: 'input_images' });
@@ -743,7 +1163,7 @@ function buildHighsfieldProject(blocks, projectName) {
         id: vidGenId, type: 'generate',
         position: { x: 760, y: yBase },
         data: { generation_type: 'seedance_2_0',
-                input: { text: prompt, duration: 8, resolution: '720p', aspect_ratio: '16:9', generate_audio: false, batch_size: 1 } },
+                input: { text: prompt, duration: 8, resolution: hfVidRes, aspect_ratio: effRatio, generate_audio: false, batch_size: 1 } },
         style: { width: 300, height: 300 }, zIndex: 4, parentId: null,
         width: 300, height: 300, measured: { width: 300, height: 300 }
       });
@@ -759,13 +1179,16 @@ function buildKreaProject(blocks, projectName) {
   const nodes = [], edges = [], ts = now();
 
   blocks.forEach((block, i) => {
-    const iv     = (block.type || '').toLowerCase() === 'video';
-    const prompt = block.description || '';
-    const yBase  = 500 + i * 1800;
+    const iv       = (block.type || '').toLowerCase() === 'video';
+    const prompt   = block.description || '';
+    const yBase    = 500 + i * 1800;
     const sid = uid(), tid = uid(), kid = uid(), oid = uid();
-    const refs    = (block.refs || []);
-    const urlRefs = refs.filter(r => r.type === 'url').map(r => r.value);
-    const imgRefs = refs.filter(r => r.type === 'img' && blockImgs[r.value]);
+    const refs     = (block.refs || []);
+    const urlRefs  = refs.filter(r => r.type === 'url').map(r => r.value);
+    const imgRefs  = refs.filter(r => r.type === 'img' && blockImgs[r.value]);
+    const effRatio = block.aspectOverride ? (block.aspectRatio || '1:1') : '1:1';
+    const effBase  = block.aspectOverride ? (block.basePx  || 1024) : 1024;
+    const kreaDims = _kreaDims(effRatio, effBase);
 
     // Sticky note
     const stickyParts = [];
@@ -789,8 +1212,8 @@ function buildKreaProject(blocks, projectName) {
     // k2ImageNode
     nodes.push({ id: kid, type: 'k2ImageNode', data: {
       ui: { isSettingsOpen: true }, name: 'Krea 2 Alpha', error: null,
-      input: { raw: false, steps: 1, width: 1024, height: 1024, prompt, quality: 'high',
-        guidance: 1, provider: 'k2', styleIds: [], aspectRatio: '1:1', styleImages: [],
+      input: { raw: false, steps: 1, width: kreaDims.w, height: kreaDims.h, prompt, quality: 'high',
+        guidance: 1, provider: 'k2', styleIds: [], aspectRatio: effRatio, styleImages: [],
         checkpointId: 'ckpt_01', imagePrompts: [], negativePrompt: '', styleStrengths: [],
         resolutionScale: 1024, runwayReferences: [], characterReferences: [],
         runwayReferenceTags: [], styleImageStrengths: [], imagePromptStrengths: [] },

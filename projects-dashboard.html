@@ -52,9 +52,8 @@
   }
   .filter-btn:hover { border-color: #444; color: var(--text); background: #1a1a1f; }
   .filter-btn.active { border-color: #555; color: var(--text); background: var(--card); }
-  .filter-btn.f-storyboard.active { background: var(--indigo-bg); color: var(--indigo); border-color: var(--indigo); }
-  .filter-btn.f-krea.active { background: var(--orange-bg); color: var(--orange); border-color: var(--orange); }
-  .filter-btn.f-higgsfield.active { background: var(--green-bg); color: var(--green); border-color: var(--green); }
+  .filter-btn.f-storyboard.active  { background: var(--indigo-bg); color: var(--indigo); border-color: var(--indigo); }
+  .filter-btn.f-drapeblocks.active { background: var(--indigo-bg); color: var(--indigo); border-color: var(--indigo); }
 
   /* ── Card grid ── */
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
@@ -76,9 +75,8 @@
     padding: 3px 8px; border-radius: 10px;
     letter-spacing: .5px; text-transform: uppercase;
   }
-  .badge.storyboard { background: var(--indigo-bg); color: var(--indigo); }
-  .badge.krea { background: var(--orange-bg); color: var(--orange); }
-  .badge.higgsfield { background: var(--green-bg); color: var(--green); }
+  .badge.storyboard   { background: var(--indigo-bg); color: var(--indigo); }
+  .badge.drapeblocks  { background: var(--indigo-bg); color: var(--indigo); }
 
   .card-chips { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .chip {
@@ -143,7 +141,7 @@
 <div class="top">
   <div class="top-left">
     <h1>Projects</h1>
-    <p>Files saved from Storyboard, Krea, and Higgsfield</p>
+    <p>Files saved from Storyboard and Drape Blocks</p>
   </div>
   <div class="search-wrap">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -153,9 +151,8 @@
 
 <div class="filters">
   <button class="filter-btn active" id="f-all" onclick="setFilter('all')">All</button>
-  <button class="filter-btn f-storyboard" id="f-storyboard" onclick="setFilter('storyboard')">Storyboard</button>
-  <button class="filter-btn f-krea" id="f-krea" onclick="setFilter('krea')">Krea Generator</button>
-  <button class="filter-btn f-higgsfield" id="f-higgsfield" onclick="setFilter('higgsfield')">Higgsfield Generator</button>
+  <button class="filter-btn f-storyboard"  id="f-storyboard"  onclick="setFilter('storyboard')">Storyboard</button>
+  <button class="filter-btn f-drapeblocks" id="f-drapeblocks" onclick="setFilter('drapeblocks')">Drape Blocks</button>
 </div>
 
 <div class="count" id="count"></div>
@@ -184,7 +181,8 @@
   }
 
   function sourceLabel(s) {
-    return s === 'higgsfield' ? 'Higgsfield' : s === 'krea' ? 'Krea' : 'Storyboard';
+    if (s === 'drapeblocks') return 'Drape Blocks';
+    return 'Storyboard';
   }
 
   function setFilter(f) {
@@ -217,7 +215,7 @@
             </svg>
           </div>
           <h3>No projects yet</h3>
-          <p>Save or export a file from the Storyboard, Krea Generator, or Higgsfield Generator tab — it will appear here automatically.</p>
+          <p>Save a file from the Storyboard or Drape Blocks tab — it will appear here automatically.</p>
         </div>`;
       return;
     }
