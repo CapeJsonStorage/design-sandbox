@@ -1794,6 +1794,20 @@ function redownloadLoaded() {
 
 window.addEventListener('message', e => {
   if (!e.data || e.data.type !== 'load-project') return;
+  // If sent from Drape Blocks, data is a base64-encoded .docx file
+  if (e.data.fileType === '.docx' || (e.data.name || '').endsWith('.docx')) {
+    try {
+      const b64 = e.data.data;
+      const bytes = atob(b64);
+      const arr = new Uint8Array(bytes.length);
+      for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+      const name = (e.data.name || 'document').replace(/\.docx$/i, '');
+      const file = new File([arr], name + '.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      handleDocFile(file);
+    } catch(err) { console.error('load-project (.docx) error', err); }
+    return;
+  }
+  // Otherwise treat as a Higgsfield JSON project
   try {
     const proj = JSON.parse(e.data.data);
     _loadedData = proj;
