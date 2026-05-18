@@ -27,7 +27,7 @@
   .tb-chip button:hover { color: var(--danger); }
   .tb-spacer { flex: 1; }
   .tb-count { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: var(--accent-dim); color: var(--accent); white-space: nowrap; flex-shrink: 0; }
-  .btn { height: 30px; padding: 0 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 5px; transition: background .12s, border-color .12s; flex-shrink: 0; }
+  .btn { height: 30px; padding: 0 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 5px; transition: background .12s, border-color .12s; flex-shrink: 0; font-family: inherit; }
   .btn:hover { background: var(--surface2); border-color: var(--border-strong); }
   .btn:disabled { opacity: .45; cursor: not-allowed; }
   .btn-orange { background: var(--orange-dim); color: var(--orange); border-color: rgba(249,115,22,.3); }
@@ -50,7 +50,7 @@
   .btn-pick:hover { opacity: .85; }
 
   /* ── Doc view ── */
-  .doc-view { width: 100%; max-width: 760px; }
+  .doc-view { width: 100%; max-width: 680px; }
 
   /* ── Paragraph items ── */
   .para-item { padding: 9px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; line-height: 1.65; color: var(--text); white-space: pre-wrap; word-break: break-word; }
@@ -61,24 +61,74 @@
   .insert-zone { padding: 2px 0; }
   .iz-divider { position: relative; display: flex; align-items: center; cursor: pointer; padding: 5px 0; }
   .iz-line { flex: 1; height: 1px; background: var(--border); transition: background .15s; }
-  .iz-btn { opacity: 0; position: absolute; left: 50%; transform: translateX(-50%); height: 22px; padding: 0 12px; border: 1px dashed var(--border-strong); border-radius: 20px; background: var(--surface2); color: var(--text-muted); font-size: 11px; font-weight: 500; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 5px; transition: opacity .12s, border-color .12s, color .12s, background .12s; }
+  .iz-btn { opacity: 0; position: absolute; left: 50%; transform: translateX(-50%); height: 22px; padding: 0 12px; border: 1px dashed var(--border-strong); border-radius: 20px; background: var(--surface2); color: var(--text-muted); font-size: 11px; font-weight: 500; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 5px; transition: opacity .12s, border-color .12s, color .12s, background .12s; font-family: inherit; }
   .iz-divider:hover .iz-line { background: var(--accent); }
   .iz-divider:hover .iz-btn { opacity: 1; border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
 
   /* ── Design block card ── */
   .block-card { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius); overflow: hidden; margin: 4px 0; }
   .block-header { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--surface2); border-bottom: 1px solid var(--border); }
-  .block-num { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); flex-shrink: 0; }
-  .block-type { height: 24px; padding: 0 22px 0 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 12px; outline: none; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M1 3l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; transition: border-color .12s; }
+  .block-num { font-family: monospace; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); flex-shrink: 0; }
+  .block-type { height: 24px; padding: 0 22px 0 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 12px; outline: none; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M1 3l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; transition: border-color .12s; font-family: inherit; }
   .block-type:focus { border-color: var(--accent); }
   .block-del { margin-left: auto; width: 26px; height: 26px; background: none; border: 1px solid transparent; border-radius: var(--radius); color: var(--text-faint); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .1s; }
   .block-del:hover { color: var(--danger); border-color: rgba(239,68,68,.3); background: rgba(239,68,68,.08); }
-  .block-fields { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
-  .block-field { display: flex; flex-direction: column; gap: 3px; }
-  .block-field label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
-  .block-field textarea { width: 100%; padding: 6px 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: inherit; font-size: 12px; line-height: 1.5; resize: vertical; outline: none; min-height: 42px; transition: border-color .12s; }
-  .block-field textarea:focus { border-color: var(--accent); }
-  .block-field textarea::placeholder { color: var(--text-faint); }
+  .block-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+
+  /* ── Frame area ── */
+  .frame-outer { }
+  .frame-wrap { border: 2px solid var(--border-strong); border-radius: 4px; background: var(--surface2); overflow: hidden; position: relative; aspect-ratio: 16/9; }
+  .frame-inner { width: 100%; height: 100%; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .frame-inner img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .frame-placeholder { display: flex; flex-direction: column; align-items: center; gap: 5px; color: var(--text-faint); font-size: 11px; pointer-events: none; }
+  .frame-actions { display: flex; gap: 4px; margin-top: 6px; }
+  .frame-btn { height: 24px; padding: 0 10px; font-size: 11px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface2); color: var(--text-muted); cursor: pointer; font-family: inherit; transition: all .1s; white-space: nowrap; display: flex; align-items: center; gap: 4px; }
+  .frame-btn:hover { background: var(--border); color: var(--text); }
+  .frame-btn.clear-btn { border-color: var(--danger); color: var(--danger); background: rgba(239,68,68,.08); }
+  .frame-btn.clear-btn:hover { background: rgba(239,68,68,.2); }
+
+  /* ── Block fields ── */
+  .block-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .bf-full { grid-column: 1/-1; }
+  .bf { display: flex; flex-direction: column; gap: 3px; }
+  .bf label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
+  .bf textarea, .bf input[type=text], .bf select {
+    width: 100%; padding: 5px 7px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text); font-family: inherit; font-size: 12px;
+    outline: none; transition: border-color .12s, background .12s;
+  }
+  .bf textarea:focus, .bf input[type=text]:focus, .bf select:focus { border-color: var(--border-strong); background: var(--surface); }
+  .bf textarea { resize: vertical; min-height: 52px; line-height: 1.5; }
+  .bf textarea::placeholder, .bf input[type=text]::placeholder { color: var(--text-faint); }
+  .bf select { appearance: none; padding-right: 22px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M1 3l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 7px center; cursor: pointer; }
+  .motion-custom { margin-top: 4px; }
+  .motion-custom input { width: 100%; padding: 5px 7px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: inherit; font-size: 12px; outline: none; transition: border-color .12s; }
+  .motion-custom input:focus { border-color: var(--border-strong); }
+  .motion-custom input::placeholder { color: var(--text-faint); }
+
+  /* ── Reference block ── */
+  .ref-block { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface2); overflow: hidden; }
+  .ref-header { display: flex; align-items: center; justify-content: space-between; padding: 5px 8px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .ref-header label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
+  .ref-add-btns { display: flex; gap: 4px; }
+  .ref-btn { height: 20px; padding: 0 8px; font-size: 10px; border: 1px solid var(--border); border-radius: 3px; background: var(--surface2); color: var(--text-muted); cursor: pointer; font-family: inherit; transition: all .1s; white-space: nowrap; }
+  .ref-btn:hover { background: var(--border); color: var(--text); }
+  .ref-body { padding: 7px 8px; }
+  .ref-url-row { display: flex; align-items: center; gap: 5px; margin-bottom: 6px; }
+  .ref-url-row input { flex: 1; padding: 4px 7px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: inherit; font-size: 12px; outline: none; transition: border-color .12s; }
+  .ref-url-row input:focus { border-color: var(--border-strong); }
+  .ref-url-row input::placeholder { color: var(--text-faint); }
+  .ref-url-add-btn { height: 26px; padding: 0 10px; font-size: 11px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface2); color: var(--text-muted); cursor: pointer; font-family: inherit; white-space: nowrap; flex-shrink: 0; transition: all .1s; }
+  .ref-url-add-btn:hover { background: var(--border); color: var(--text); }
+  .ref-items { display: flex; flex-direction: column; gap: 4px; }
+  .ref-item { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+  .ref-item-thumb { width: 40px; height: 30px; border-radius: 3px; overflow: hidden; border: 1px solid var(--border); flex-shrink: 0; }
+  .ref-item-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ref-item-icon { width: 40px; height: 30px; border-radius: 3px; background: var(--surface2); border: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .ref-item-label { flex: 1; font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ref-item-del { background: none; border: none; cursor: pointer; color: var(--text-faint); font-size: 12px; padding: 2px 5px; border-radius: 3px; line-height: 1; flex-shrink: 0; }
+  .ref-item-del:hover { color: var(--danger); background: rgba(239,68,68,.15); }
+  .ref-empty { font-size: 11px; color: var(--text-faint); padding: 2px 0; }
 
   /* ── Error ── */
   .err-bar { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.3); border-radius: var(--radius); padding: 10px 14px; color: #fca5a5; font-size: 13px; margin-bottom: 16px; display: none; }
@@ -105,6 +155,7 @@
     <span class="tb-count" id="block-count">0 blocks</span>
     <button class="btn" onclick="saveProject()">💾 Save .docx</button>
     <button class="btn" onclick="saveLocally()">⬇ .docx</button>
+    <button class="btn" id="btn-dl-images" onclick="downloadImages()">⬇ Images</button>
     <div class="tb-sep"></div>
     <button class="btn btn-orange" id="btn-hf-save" onclick="saveHighsfieldProject()">💾 Higgsfield</button>
     <button class="btn btn-orange" id="btn-hf-dl" onclick="downloadHighsfieldBtn()">⬇ .higgsfield</button>
@@ -123,7 +174,7 @@
         <line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/>
       </svg>
       <div class="dz-title">Drop your Drape .docx here</div>
-      <div class="dz-sub">Upload a formatted Drape document — insert DESIGN blocks between sections, then send directly to Higgsfield or Krea Generator</div>
+      <div class="dz-sub">Upload a formatted Drape document — insert DESIGN blocks between sections, then export to Higgsfield or Krea</div>
       <button class="btn-pick" onclick="document.getElementById('file-input').click()">Browse file</button>
       <input type="file" id="file-input" accept=".docx" style="display:none">
     </div>
@@ -137,17 +188,23 @@
 
 <script>
 const W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+const MOTIONS = ['Pan Left','Pan Right','Pan Up','Pan Down','Dolly Left','Dolly Right',
+  'Dolly Up','Dolly Down','Zoom In','Zoom Out','Handheld','Orbit Left','Orbit Right',
+  'Orbit Up','Handheld Forward','Handheld Backwards'];
 
-let docZip = null;
+let docZip    = null;
 let docXmlStr = '';
-let docParas = [];   // [{text, isEmpty, isTable}]
-let docBlocks = [];  // [{afterIdx, type, description, ref, _id}]
-let docName = '';
+let docParas  = [];   // [{text, isEmpty, isTable}]
+let docBlocks = [];   // [{afterIdx, type, description, motion, motionCustom, imgKey, refs[], _id}]
+let blockImgs = {};   // imgKey → dataURL
+let docName   = '';
 let _seq = 0;
-function uid() { return (++_seq) + '_' + Math.random().toString(36).slice(2); }
-function escXml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-// ── Dropzone ─────────────────────────────────────────────────────
+function uid()    { return (++_seq) + '_' + Math.random().toString(36).slice(2); }
+function esc(s)   { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function now()    { return new Date().toISOString(); }
+
+// ── Dropzone ──────────────────────────────────────────────────────
 const dz = document.getElementById('dropzone');
 const fi = document.getElementById('file-input');
 dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
@@ -165,48 +222,46 @@ async function handleFile(file) {
     const xmlFile = docZip.file('word/document.xml');
     if (!xmlFile) { showErr('Could not read document.xml from this file.'); return; }
     docXmlStr = await xmlFile.async('string');
-    docParas = parseParas(docXmlStr);
+    docParas  = parseParas(docXmlStr);
     docBlocks = [];
-    docName = file.name.replace(/\.docx$/i, '');
-
+    blockImgs = {};
+    docName   = file.name.replace(/\.docx$/i, '');
     document.getElementById('upload-area').style.display = 'none';
-    document.getElementById('doc-view').style.display = 'block';
-    document.getElementById('file-chip').style.display = 'flex';
-    document.getElementById('chip-name').textContent = file.name;
-    const acts = document.getElementById('tb-actions');
-    acts.style.display = 'flex';
+    document.getElementById('doc-view').style.display   = 'block';
+    document.getElementById('file-chip').style.display  = 'flex';
+    document.getElementById('chip-name').textContent    = file.name;
+    document.getElementById('tb-actions').style.display = 'flex';
     renderDocView();
   } catch(e) { showErr('Failed to open file: ' + e.message); }
 }
 
 function resetDoc() {
-  docZip = null; docXmlStr = ''; docParas = []; docBlocks = []; docName = '';
+  docZip = null; docXmlStr = ''; docParas = []; docBlocks = []; blockImgs = {}; docName = '';
   document.getElementById('upload-area').style.display = 'flex';
-  document.getElementById('doc-view').style.display = 'none';
-  document.getElementById('file-chip').style.display = 'none';
+  document.getElementById('doc-view').style.display   = 'none';
+  document.getElementById('file-chip').style.display  = 'none';
   document.getElementById('tb-actions').style.display = 'none';
-  document.getElementById('doc-container').innerHTML = '';
+  document.getElementById('doc-container').innerHTML  = '';
   fi.value = '';
 }
 
 function showErr(msg) { const b = document.getElementById('err-bar'); b.textContent = msg; b.style.display = 'block'; }
-function hideErr() { document.getElementById('err-bar').style.display = 'none'; }
+function hideErr()    { document.getElementById('err-bar').style.display = 'none'; }
 
-// ── Parse paragraphs (top-level body children only) ───────────────
+// ── Parse paragraphs ──────────────────────────────────────────────
 function parseParas(xmlStr) {
-  const doc = new DOMParser().parseFromString(xmlStr, 'application/xml');
+  const doc  = new DOMParser().parseFromString(xmlStr, 'application/xml');
   const body = doc.getElementsByTagNameNS(W, 'body')[0];
   if (!body) return [];
   const items = [];
   for (const node of body.childNodes) {
     if (node.nodeType !== 1) continue;
     if (node.localName === 'p') {
-      const text = Array.from(node.getElementsByTagNameNS(W, 't')).map(t => t.textContent).join('');
+      const text = Array.from(node.getElementsByTagNameNS(W,'t')).map(t=>t.textContent).join('');
       items.push({ text: text.trim(), isEmpty: !text.trim(), isTable: false });
     } else if (node.localName === 'tbl') {
-      // Represent table as a placeholder
-      const firstText = Array.from(node.getElementsByTagNameNS(W, 't')).slice(0,6).map(t => t.textContent).join(' ').trim();
-      items.push({ text: firstText ? '[Table: ' + firstText.slice(0,60) + '…]' : '[Table]', isEmpty: false, isTable: true });
+      const firstText = Array.from(node.getElementsByTagNameNS(W,'t')).slice(0,6).map(t=>t.textContent).join(' ').trim();
+      items.push({ text: firstText ? '[Table: '+firstText.slice(0,60)+'…]' : '[Table]', isEmpty: false, isTable: true });
     }
   }
   return items;
@@ -216,15 +271,11 @@ function parseParas(xmlStr) {
 function renderDocView() {
   const c = document.getElementById('doc-container');
   c.innerHTML = '';
-
-  // Zone before first item (afterIdx = -1)
   c.appendChild(makeZone(-1));
-
   docParas.forEach((para, i) => {
     c.appendChild(makeParaEl(para));
     c.appendChild(makeZone(i));
   });
-
   updateCount();
 }
 
@@ -239,10 +290,16 @@ function makeZone(afterIdx) {
   const zone = document.createElement('div');
   zone.className = 'insert-zone';
 
-  // Render any blocks at this position
-  docBlocks.filter(b => b.afterIdx === afterIdx).forEach(b => zone.appendChild(makeBlockCard(b)));
+  docBlocks.filter(b => b.afterIdx === afterIdx).forEach(b => {
+    const n   = docBlocks.indexOf(b) + 1;
+    const tmp = document.createElement('div');
+    tmp.innerHTML = blockCardHTML(b, n);
+    const card = tmp.firstElementChild;
+    _bindCard(card, b._id);
+    zone.appendChild(card);
+  });
 
-  // Insert button row
+  // Insert divider
   const div = document.createElement('div');
   div.className = 'iz-divider';
   const l = document.createElement('div'); l.className = 'iz-line';
@@ -256,62 +313,201 @@ function makeZone(afterIdx) {
   return zone;
 }
 
-function makeBlockCard(block) {
-  const n = docBlocks.indexOf(block) + 1;
-  const card = document.createElement('div');
-  card.className = 'block-card';
-  card.dataset.id = block._id;
-
-  // Header
-  const hdr = document.createElement('div'); hdr.className = 'block-header';
-  const num = document.createElement('span'); num.className = 'block-num'; num.textContent = `Design Block ${n}`;
-
-  const typeSel = document.createElement('select'); typeSel.className = 'block-type';
-  ['Still','Video'].forEach(t => {
-    const o = document.createElement('option'); o.value = t; o.textContent = t;
-    if (block.type === t) o.selected = true;
-    typeSel.appendChild(o);
-  });
-  typeSel.addEventListener('change', () => block.type = typeSel.value);
-
-  const del = document.createElement('button'); del.className = 'block-del'; del.title = 'Delete';
-  del.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>`;
-  del.onclick = () => { docBlocks = docBlocks.filter(b => b._id !== block._id); renderDocView(); };
-
-  hdr.append(num, typeSel, del);
-
-  // Fields
-  const fields = document.createElement('div'); fields.className = 'block-fields';
-  fields.appendChild(makeField('Description', block.description, 'Describe this design block…', 3, v => block.description = v));
-  fields.appendChild(makeField('Ref URLs', block.ref, 'Reference image URLs (space or comma separated)…', 2, v => block.ref = v));
-
-  card.append(hdr, fields);
-  return card;
+// Bind file input events after innerHTML render
+function _bindCard(card, id) {
+  card.querySelector(`#frame-fi-${id}`)?.addEventListener('change', e => handleFrameFile(e, id));
+  card.querySelector(`#ref-fi-${id}`)?.addEventListener('change',   e => handleRefFiles(e, id));
 }
 
-function makeField(label, value, placeholder, rows, onChange) {
-  const wrap = document.createElement('div'); wrap.className = 'block-field';
-  const lbl = document.createElement('label'); lbl.textContent = label;
-  const ta = document.createElement('textarea');
-  ta.rows = rows; ta.placeholder = placeholder; ta.value = value || '';
-  ta.addEventListener('input', () => onChange(ta.value));
-  wrap.append(lbl, ta);
-  return wrap;
+// Re-render a single block card in place (avoids full doc re-render for local changes)
+function rerenderBlock(id) {
+  const card = document.querySelector(`.block-card[data-id="${id}"]`);
+  if (!card) { renderDocView(); return; }
+  const b = docBlocks.find(b => b._id === id);
+  if (!b) return;
+  const n   = docBlocks.indexOf(b) + 1;
+  const tmp = document.createElement('div');
+  tmp.innerHTML = blockCardHTML(b, n);
+  const newCard = tmp.firstElementChild;
+  _bindCard(newCard, id);
+  card.replaceWith(newCard);
+}
+
+// ── Block card HTML ───────────────────────────────────────────────
+function blockCardHTML(block, n) {
+  const id       = block._id;
+  const hasFrame = block.imgKey && blockImgs[block.imgKey];
+  const refs     = block.refs || [];
+  const motion   = block.motion || '';
+
+  // Motion options
+  const motionOpts = `<option value="">— None —</option>${MOTIONS.map(m =>
+    `<option value="${m}"${m === motion ? ' selected' : ''}>${m}</option>`).join('')
+  }<option value="Custom"${'Custom' === motion ? ' selected' : ''}>Custom…</option>`;
+
+  // Ref items
+  const refItemsHTML = refs.length ? refs.map((r, ri) => `
+    <div class="ref-item">
+      ${r.type === 'img' && blockImgs[r.value]
+        ? `<div class="ref-item-thumb"><img src="${blockImgs[r.value]}" alt=""></div>`
+        : `<div class="ref-item-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="#888" stroke-width="1.2" stroke-linecap="round"/></svg></div>`}
+      <span class="ref-item-label" title="${esc(r.label)}">${esc(r.label)}</span>
+      <button class="ref-item-del" onclick="_deleteRef('${id}',${ri})">✕</button>
+    </div>`).join('') : `<div class="ref-empty">No references yet</div>`;
+
+  return `<div class="block-card" data-id="${id}">
+    <div class="block-header">
+      <span class="block-num">Design Block ${n}</span>
+      <select class="block-type" onchange="_upd('${id}','type',this.value)">
+        <option value="Still"${block.type === 'Still' ? ' selected' : ''}>Still</option>
+        <option value="Video"${block.type === 'Video' ? ' selected' : ''}>Video</option>
+      </select>
+      <button class="block-del" onclick="_delBlock('${id}')" title="Delete block">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      </button>
+    </div>
+
+    <div class="block-body">
+      <div class="frame-outer">
+        <div class="frame-wrap">
+          <div class="frame-inner">
+            ${hasFrame
+              ? `<img src="${blockImgs[block.imgKey]}" alt="">`
+              : `<div class="frame-placeholder">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="18" height="18" rx="2" stroke="#555" stroke-width="1.2"/><circle cx="8" cy="8" r="2" fill="#555"/><path d="M2 15l5-5 3 3 4-4 5 5" stroke="#555" stroke-width="1.2" stroke-linecap="round"/></svg>
+                  <span>No frame image</span>
+                </div>`}
+          </div>
+        </div>
+        <div class="frame-actions">
+          <button class="frame-btn" onclick="_triggerFrame('${id}')">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 8V2M3 5l3-3 3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M1 9v1a1 1 0 001 1h8a1 1 0 001-1V9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Upload frame
+          </button>
+          ${hasFrame ? `<button class="frame-btn clear-btn" onclick="_clearFrame('${id}')">Clear</button>` : ''}
+        </div>
+        <input type="file" id="frame-fi-${id}" accept="image/*" style="display:none">
+      </div>
+
+      <div class="block-fields">
+        <div class="bf bf-full">
+          <label>Description</label>
+          <textarea rows="3" placeholder="Describe this design block — becomes the generation prompt…" oninput="_upd('${id}','description',this.value)">${esc(block.description)}</textarea>
+        </div>
+        <div class="bf bf-full">
+          <label>Motion</label>
+          <select onchange="_updMotion('${id}',this.value)">${motionOpts}</select>
+          ${motion === 'Custom' ? `<div class="motion-custom"><input type="text" placeholder="Describe custom motion…" value="${esc(block.motionCustom)}" oninput="_upd('${id}','motionCustom',this.value)"></div>` : ''}
+        </div>
+        <div class="bf bf-full">
+          <div class="ref-block">
+            <div class="ref-header">
+              <label>References</label>
+              <div class="ref-add-btns">
+                <button class="ref-btn" onclick="_triggerRef('${id}')">+ Upload image</button>
+              </div>
+            </div>
+            <div class="ref-body">
+              <div class="ref-url-row">
+                <input type="text" id="ref-url-inp-${id}" placeholder="Paste reference URL and press Add…" onkeydown="if(event.key==='Enter')_addRefUrl('${id}')">
+                <button class="ref-url-add-btn" onclick="_addRefUrl('${id}')">Add</button>
+              </div>
+              <div class="ref-items">${refItemsHTML}</div>
+            </div>
+          </div>
+          <input type="file" id="ref-fi-${id}" accept="image/*" multiple style="display:none">
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── Block data helpers ────────────────────────────────────────────
+function _upd(id, key, val) {
+  const b = docBlocks.find(b => b._id === id);
+  if (b) b[key] = val;
+}
+
+function _updMotion(id, val) {
+  const b = docBlocks.find(b => b._id === id);
+  if (!b) return;
+  b.motion = val;
+  if (val !== 'Custom') b.motionCustom = '';
+  rerenderBlock(id);
+}
+
+function _delBlock(id) {
+  docBlocks = docBlocks.filter(b => b._id !== id);
+  renderDocView();
 }
 
 function addBlock(afterIdx) {
-  const block = { afterIdx, type: 'Still', description: '', ref: '', _id: uid() };
+  const block = { afterIdx, type: 'Still', description: '', motion: '', motionCustom: '', imgKey: null, refs: [], _id: uid() };
   docBlocks.push(block);
   renderDocView();
   setTimeout(() => {
     const card = document.querySelector(`.block-card[data-id="${block._id}"]`);
     if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, 50);
+  }, 60);
 }
 
 function updateCount() {
   const n = docBlocks.length;
   document.getElementById('block-count').textContent = n + ' block' + (n !== 1 ? 's' : '');
+}
+
+// ── Frame image ───────────────────────────────────────────────────
+function _triggerFrame(id) { document.getElementById('frame-fi-' + id)?.click(); }
+
+function handleFrameFile(e, id) {
+  const file = e.target.files[0]; if (!file) return;
+  const b = docBlocks.find(b => b._id === id); if (!b) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const key = 'frame_' + uid();
+    blockImgs[key] = ev.target.result;
+    b.imgKey = key;
+    rerenderBlock(id);
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+function _clearFrame(id) {
+  const b = docBlocks.find(b => b._id === id);
+  if (b) { b.imgKey = null; rerenderBlock(id); }
+}
+
+// ── Reference images/URLs ─────────────────────────────────────────
+function _triggerRef(id) { document.getElementById('ref-fi-' + id)?.click(); }
+
+function handleRefFiles(e, id) {
+  const b = docBlocks.find(b => b._id === id); if (!b) return;
+  Array.from(e.target.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const key = 'ref_' + uid();
+      blockImgs[key] = ev.target.result;
+      b.refs.push({ type: 'img', value: key, label: file.name });
+      rerenderBlock(id);
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value = '';
+}
+
+function _addRefUrl(id) {
+  const inp = document.getElementById('ref-url-inp-' + id);
+  if (!inp) return;
+  const v = inp.value.trim(); if (!v) return;
+  const b = docBlocks.find(b => b._id === id); if (!b) return;
+  b.refs.push({ type: 'url', value: v, label: v });
+  rerenderBlock(id);
+}
+
+function _deleteRef(id, ri) {
+  const b = docBlocks.find(b => b._id === id);
+  if (b) { b.refs.splice(ri, 1); rerenderBlock(id); }
 }
 
 // ── Generate modified .docx ───────────────────────────────────────
@@ -329,23 +525,16 @@ async function generateDocx() {
 
 function buildXml() {
   if (!docBlocks.length) return docXmlStr;
-
-  // Parse to DOM, insert DESIGN paragraphs, serialize back
-  const doc = new DOMParser().parseFromString(docXmlStr, 'application/xml');
+  const doc  = new DOMParser().parseFromString(docXmlStr, 'application/xml');
   const body = doc.getElementsByTagNameNS(W, 'body')[0];
   if (!body) return docXmlStr;
 
-  // Top-level body paragraphs (w:p) and tables (w:tbl) — in document order
   const bodyItems = Array.from(body.childNodes).filter(n => n.nodeType === 1 && (n.localName === 'p' || n.localName === 'tbl'));
-
-  // Sort blocks descending by afterIdx so earlier insertions don't shift later positions
-  const sorted = [...docBlocks].filter(b => b.description || b.ref).sort((a, b) => b.afterIdx - a.afterIdx);
+  const sorted    = [...docBlocks].filter(b => b.description || b.refs?.length).sort((a, b) => b.afterIdx - a.afterIdx);
 
   for (const block of sorted) {
     const paras = makeDesignParas(doc, block);
-
     if (block.afterIdx === -1) {
-      // Before first item
       const first = bodyItems[0] || null;
       paras.forEach(p => body.insertBefore(p, first));
     } else if (block.afterIdx < bodyItems.length) {
@@ -353,39 +542,78 @@ function buildXml() {
       const next = ref.nextSibling;
       paras.forEach(p => body.insertBefore(p, next));
     } else {
-      // After all items — insert before w:sectPr if present
       const sectPr = body.lastElementChild?.localName === 'sectPr' ? body.lastElementChild : null;
       paras.forEach(p => body.insertBefore(p, sectPr));
     }
   }
-
   return new XMLSerializer().serializeToString(doc);
 }
 
 function makeDesignParas(doc, block) {
+  // Collect URL refs + filenames of uploaded images for the Ref line
+  const refParts = [];
+  (block.refs || []).forEach(r => {
+    if (r.type === 'url')  refParts.push(r.value);
+    if (r.type === 'img')  refParts.push('[image: ' + r.label + ']');
+  });
+  const effectiveMotion = block.motion === 'Custom' ? (block.motionCustom || 'Custom') : block.motion;
+
   const lines = [
     'DESIGN:',
     'Type: ' + (block.type || 'Still'),
-    block.description ? 'Description: ' + block.description.trim() : null,
-    block.ref         ? 'Ref: '         + block.ref.trim()         : null,
+    block.description  ? 'Description: ' + block.description.trim()  : null,
+    effectiveMotion    ? 'Motion: '      + effectiveMotion            : null,
+    refParts.length    ? 'Ref: '         + refParts.join(', ')        : null,
   ].filter(Boolean);
 
   return lines.map(line => {
-    const p     = doc.createElementNS(W, 'w:p');
-    const r     = doc.createElementNS(W, 'w:r');
-    const rPr   = doc.createElementNS(W, 'w:rPr');
-    const color = doc.createElementNS(W, 'w:color');
+    const p = doc.createElementNS(W, 'w:p'), r = doc.createElementNS(W, 'w:r');
+    const rPr = doc.createElementNS(W, 'w:rPr'), color = doc.createElementNS(W, 'w:color');
     color.setAttributeNS(W, 'val', 'FF0000');
     rPr.appendChild(color);
-    const t = doc.createElementNS(W, 'w:t');
-    t.textContent = line;
-    r.append(rPr, t);
-    p.appendChild(r);
+    const t = doc.createElementNS(W, 'w:t'); t.textContent = line;
+    r.append(rPr, t); p.appendChild(r);
     return p;
   });
 }
 
-// ── Actions ───────────────────────────────────────────────────────
+// ── Download Images ───────────────────────────────────────────────
+async function downloadImages() {
+  const hasAny = docBlocks.some(b =>
+    (b.imgKey && blockImgs[b.imgKey]) ||
+    (b.refs||[]).some(r => r.type === 'img' && blockImgs[r.value])
+  );
+  if (!hasAny) { showErr('No uploaded images to download.'); return; }
+
+  const btn = document.getElementById('btn-dl-images');
+  const orig = btn?.innerHTML;
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
+
+  const zip = new JSZip();
+  docBlocks.forEach((b, i) => {
+    const n = i + 1;
+    if (b.imgKey && blockImgs[b.imgKey]) {
+      const d = blockImgs[b.imgKey];
+      const ext = d.startsWith('data:image/jpeg') || d.startsWith('data:image/jpg') ? 'jpg' : 'png';
+      zip.file(`block_${n}_frame.${ext}`, d.split(',')[1], { base64: true });
+    }
+    (b.refs||[]).filter(r => r.type === 'img' && blockImgs[r.value]).forEach((r, ri) => {
+      const d   = blockImgs[r.value];
+      const ext = d.startsWith('data:image/jpeg') || d.startsWith('data:image/jpg') ? 'jpg' : 'png';
+      const lbl = (r.label || ('ref' + ri)).replace(/[^a-zA-Z0-9_.-]/g, '_');
+      zip.file(`block_${n}_ref_${lbl}.${ext}`, d.split(',')[1], { base64: true });
+    });
+  });
+
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (docName || 'drape_blocks') + '_images.zip';
+  a.click(); URL.revokeObjectURL(a.href);
+  if (btn) { btn.textContent = '✓'; setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; }, 1500); }
+}
+
+// ── .docx save/load ───────────────────────────────────────────────
 async function saveProject() {
   if (!docZip) return;
   const btn = document.querySelector('.btn[onclick="saveProject()"]');
@@ -409,26 +637,39 @@ async function saveLocally() {
   } catch(e) { showErr('Download failed: ' + e.message); }
 }
 
-// ── Higgsfield JSON builder ───────────────────────────────────────
-function now() { return new Date().toISOString(); }
+async function docxToBase64() {
+  const blob = await generateDocx();
+  return new Promise((res, rej) => {
+    const fr = new FileReader(); fr.readAsDataURL(blob);
+    fr.onload = () => res(fr.result.split(',')[1]);
+    fr.onerror = rej;
+  });
+}
 
+// ── Higgsfield JSON builder ───────────────────────────────────────
 function buildHighsfieldProject(blocks, projectName) {
   const nodes = [], edges = [];
-  const ROW_GAP_Y = 1000;
+  const ROW_GAP_Y = 1400;
 
   blocks.forEach((block, i) => {
-    const iv = (block.type || '').toLowerCase() === 'video';
+    const iv     = (block.type || '').toLowerCase() === 'video';
     const prompt = block.description || '';
-    const yBase = i * ROW_GAP_Y;
+    const yBase  = i * ROW_GAP_Y;
+    const refs   = (block.refs || []);
+    const urlRefs = refs.filter(r => r.type === 'url').map(r => r.value);
+    const imgRefs = refs.filter(r => r.type === 'img' && blockImgs[r.value]);
 
     // Sticky note
-    const stickyId = uid();
-    const stickyText = (block.ref ? 'Ref: ' + block.ref : '') || ('DESIGN ' + (i + 1));
+    const stickyId   = uid();
+    const stickyParts = [];
+    if (urlRefs.length)  stickyParts.push('Ref URLs:\n' + urlRefs.join('\n'));
+    if (imgRefs.length)  stickyParts.push('Images: ' + imgRefs.map(r => r.label).join(', '));
+    const stickyText = stickyParts.join('\n\n') || ('DESIGN ' + (i + 1));
+
     nodes.push({
       id: stickyId, type: 'stickyNote',
       position: { x: 0, y: yBase - 280 },
-      data: { text: stickyText, fontSize: 24, color: '#fef3c7',
-              input_type: 'text', input: { text: stickyText } },
+      data: { text: stickyText, fontSize: 20, color: '#fef3c7', input_type: 'text', input: { text: stickyText } },
       style: { width: 300, height: 200 }, zIndex: 1, parentId: null,
       width: 300, height: 200, measured: { width: 300, height: 200 }
     });
@@ -441,6 +682,33 @@ function buildHighsfieldProject(blocks, projectName) {
       data: { input_type: 'text', input: { text: prompt } },
       style: { width: 296, height: 151 }, zIndex: 2, parentId: null,
       width: 296, height: 151, measured: { width: 296, height: 151 }
+    });
+
+    // Frame image node (if uploaded)
+    if (block.imgKey && blockImgs[block.imgKey]) {
+      const frameId = uid();
+      nodes.push({
+        id: frameId, type: 'media',
+        position: { x: 0, y: yBase + 200 },
+        data: { mediaType: 'image', loading: false, url: blockImgs[block.imgKey], previewUrl: blockImgs[block.imgKey] },
+        style: { width: 300, height: 300 }, zIndex: 2, parentId: null,
+        width: 300, height: 300, measured: { width: 300, height: 300 }
+      });
+      // frame → image gen (will be added after imgGenId is created)
+      nodes._frameId = frameId; // temp stash
+    }
+
+    // Ref image media nodes
+    const mediaIds = imgRefs.map((r, j) => {
+      const mediaId = uid();
+      nodes.push({
+        id: mediaId, type: 'media',
+        position: { x: 0, y: yBase + 200 + (block.imgKey && blockImgs[block.imgKey] ? 340 : 0) + j * 340 },
+        data: { mediaType: 'image', loading: false, url: blockImgs[r.value], previewUrl: blockImgs[r.value] },
+        style: { width: 300, height: 300 }, zIndex: 2, parentId: null,
+        width: 300, height: 300, measured: { width: 300, height: 300 }
+      });
+      return mediaId;
     });
 
     // Image generate node
@@ -457,7 +725,18 @@ function buildHighsfieldProject(blocks, projectName) {
     // prompt → image gen
     edges.push({ id: uid(), source: promptId, sourceHandle: 'text', target: imgGenId, targetHandle: 'prompt' });
 
-    // Video generate node (video blocks only)
+    // frame → image gen
+    if (nodes._frameId) {
+      edges.push({ id: uid(), source: nodes._frameId, sourceHandle: 'image', target: imgGenId, targetHandle: 'input_images' });
+      delete nodes._frameId;
+    }
+
+    // ref media → image gen
+    mediaIds.forEach(mid => {
+      edges.push({ id: uid(), source: mid, sourceHandle: 'image', target: imgGenId, targetHandle: 'input_images' });
+    });
+
+    // Video generate node
     if (iv) {
       const vidGenId = uid();
       nodes.push({
@@ -480,13 +759,20 @@ function buildKreaProject(blocks, projectName) {
   const nodes = [], edges = [], ts = now();
 
   blocks.forEach((block, i) => {
-    const iv = (block.type || '').toLowerCase() === 'video';
+    const iv     = (block.type || '').toLowerCase() === 'video';
     const prompt = block.description || '';
-    const yBase = 500 + i * 1800;
+    const yBase  = 500 + i * 1800;
     const sid = uid(), tid = uid(), kid = uid(), oid = uid();
+    const refs    = (block.refs || []);
+    const urlRefs = refs.filter(r => r.type === 'url').map(r => r.value);
+    const imgRefs = refs.filter(r => r.type === 'img' && blockImgs[r.value]);
 
     // Sticky note
-    const stickyText = (block.ref ? 'Ref: ' + block.ref : '') || ('DESIGN ' + (i + 1));
+    const stickyParts = [];
+    if (urlRefs.length) stickyParts.push('Ref URLs:\n' + urlRefs.join('\n'));
+    if (imgRefs.length) stickyParts.push('Images: ' + imgRefs.map(r => r.label).join(', '));
+    const stickyText = stickyParts.join('\n\n') || ('DESIGN ' + (i + 1));
+
     nodes.push({ id: sid, type: 'stickyNoteNode', data: {
       name: 'Sticky Note', input: { text: stickyText + '\n' },
       nodeCategory: 'utility', error: null, state: null, output: null,
@@ -516,6 +802,48 @@ function buildKreaProject(blocks, projectName) {
     edges.push({ id: `xy-edge__${tid}outputText-${kid}prompt`,
       source: tid, sourceHandle: 'outputText', target: kid, targetHandle: 'prompt' });
 
+    // Frame image node
+    if (block.imgKey && blockImgs[block.imgKey]) {
+      const fid = uid();
+      nodes.push({ id: fid, type: 'imageNode', data: { name: 'Frame',
+        input: { image: blockImgs[block.imgKey], isUploading: false },
+        output: { outputImage: blockImgs[block.imgKey] },
+        nodeCategory: 'assets', error: null, state: null,
+        created_at: ts, updated_at: ts, status: 'pending', data: {}
+      }, position: { x: 150, y: yBase + 420 }, measured: { width: 256, height: 256 }, width: 256, height: 256 });
+      edges.push({ id: `xy-edge__${fid}outputImage-${kid}styleImage_0`,
+        source: fid, sourceHandle: 'outputImage', target: kid, targetHandle: 'styleImage_0' });
+    }
+
+    // Ref image nodes + LLM nodes
+    imgRefs.forEach((r, j) => {
+      const refId = uid(), llmId = uid();
+      const refY  = yBase + 420 + (block.imgKey && blockImgs[block.imgKey] ? 320 : 0) + j * 320;
+      const imgVal = blockImgs[r.value];
+      nodes.push({ id: refId, type: 'imageNode', data: { name: 'Ref Image',
+        input: { image: imgVal, isUploading: false }, output: { outputImage: imgVal },
+        nodeCategory: 'assets', error: null, state: null,
+        created_at: ts, updated_at: ts, status: 'pending', data: {}
+      }, position: { x: 150, y: refY }, measured: { width: 256, height: 256 }, width: 256, height: 256 });
+
+      nodes.push({ id: llmId, type: 'llmNode', data: {
+        nodeCategory: 'utility', name: 'LLM Call' + (imgRefs.length > 1 ? ' ' + (j+1) : ''),
+        input: {
+          systemPrompt: 'You are an image describer in natural language, pay attention to camera, lens type, composition, color profile, image content, break down each element in great detail, consolidate your findings in 5-6 sentences',
+          userPrompt: 'Describe this image in natural language',
+          images: [imgVal], model: 'openai/gpt-4o-mini'
+        },
+        output: { outputText: '' }, status: 'pending', error: null, state: null,
+        created_at: ts, updated_at: ts, data: {}
+      }, position: { x: 470, y: refY }, measured: { width: 256, height: 774 }, width: 256 });
+
+      edges.push({ id: `xy-edge__${refId}outputImage-${llmId}image_0`,
+        source: refId, sourceHandle: 'outputImage', target: llmId, targetHandle: 'image_0' });
+      edges.push({ id: `xy-edge__${refId}outputImage-${kid}styleImage_${j + (block.imgKey && blockImgs[block.imgKey] ? 1 : 0)}`,
+        source: refId, sourceHandle: 'outputImage', target: kid,
+        targetHandle: `styleImage_${j + (block.imgKey && blockImgs[block.imgKey] ? 1 : 0)}` });
+    });
+
     // Output node(s)
     if (iv) {
       const vid = uid(), vo = uid();
@@ -534,7 +862,7 @@ function buildKreaProject(blocks, projectName) {
         error: null, state: null, created_at: ts, updated_at: ts, status: 'pending', data: {}
       }, position: { x: 1980, y: yBase + 200 }, measured: { width: 256, height: 168 }, width: 256, height: 168 });
       edges.push({ id: `${kid}-${vid}`, source: kid, sourceHandle: 'outputImage', target: vid, targetHandle: 'startFrame' });
-      edges.push({ id: `${vid}-${vo}`, source: vid, sourceHandle: 'outputVideo', target: vo, targetHandle: 'video' });
+      edges.push({ id: `${vid}-${vo}`,  source: vid, sourceHandle: 'outputVideo',  target: vo,  targetHandle: 'video' });
     } else {
       nodes.push({ id: oid, type: 'imageNode', data: { name: 'Image', error: null,
         input: { isUploading: false }, state: null, output: {}, status: 'pending',
@@ -602,15 +930,6 @@ function saveKreaProject() {
     const b64 = _jsonToBase64(buildKreaProject(docBlocks, docName));
     window.parent.postMessage({ type: 'save-project', source: 'drapeblocks',
       fileType: '.krea', name: (docName || 'krea') + '.krea', data: b64 }, '*');
-  });
-}
-
-async function docxToBase64() {
-  const blob = await generateDocx();
-  return new Promise((res, rej) => {
-    const fr = new FileReader(); fr.readAsDataURL(blob);
-    fr.onload = () => res(fr.result.split(',')[1]);
-    fr.onerror = rej;
   });
 }
 

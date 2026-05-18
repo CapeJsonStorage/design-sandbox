@@ -157,21 +157,6 @@
       <span class="tab-label">Higgsfield Tools</span>
     </button>
 
-    <button class="nav-tab orange" id="tab-higgsfield" onclick="showTab('higgsfield')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
-      </svg>
-      <span class="tab-label">Higgsfield Generator</span>
-    </button>
-
-    <button class="nav-tab" id="tab-krea" onclick="showTab('krea')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3L14.5 4z"/>
-        <circle cx="12" cy="13" r="3"/>
-      </svg>
-      <span class="tab-label">Krea Generator</span>
-    </button>
-
     <button class="nav-tab" id="tab-drapeblocks" onclick="showTab('drapeblocks')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
@@ -193,12 +178,6 @@
   <div class="panel active" id="panel-storyboard">
     <iframe src="storyboard-app.html" title="Storyboard"></iframe>
   </div>
-  <div class="panel" id="panel-krea">
-    <iframe src="docx_to_krea_v5.html" title="Krea Generator"></iframe>
-  </div>
-  <div class="panel" id="panel-higgsfield">
-    <iframe src="higgsfield-generator.html" title="Higgsfield Generator" allow="clipboard-write"></iframe>
-  </div>
   <div class="panel" id="panel-htools">
     <iframe src="higgsfield-tools.html" title="Higgsfield Tools"></iframe>
   </div>
@@ -208,7 +187,7 @@
 </div>
 
 <script>
-const TABS = ['projects', 'storyboard', 'krea', 'higgsfield', 'htools', 'drapeblocks'];
+const TABS = ['projects', 'storyboard', 'htools', 'drapeblocks'];
 
 function showTab(name) {
   TABS.forEach(t => {
