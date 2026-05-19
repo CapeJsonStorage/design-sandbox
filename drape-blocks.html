@@ -56,6 +56,9 @@
   .para-item { padding: 9px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; line-height: 1.65; color: var(--text); white-space: pre-wrap; word-break: break-word; }
   .para-item.empty { padding: 0; height: 10px; background: transparent; border-color: transparent; }
   .para-item.tbl-placeholder { color: var(--text-faint); font-style: italic; font-size: 12px; }
+  .para-item.h1 { font-size: 20px; font-weight: 700; letter-spacing: -.35px; color: var(--text); border-left-color: var(--accent); }
+  .para-item.h2 { font-size: 16px; font-weight: 600; letter-spacing: -.2px; color: var(--text); }
+  .para-item.h3 { font-size: 14px; font-weight: 600; color: var(--text); }
 
   /* ── Insert zone ── */
   .insert-zone { padding: 2px 0; }
@@ -407,10 +410,31 @@ function parseParas(xmlStr) {
     if (node.nodeType !== 1) continue;
     if (node.localName === 'p') {
       const text = Array.from(node.getElementsByTagNameNS(W,'t')).map(t=>t.textContent).join('');
-      items.push({ text: text.trim(), isEmpty: !text.trim(), isTable: false });
+      // Detect heading level from paragraph style or outline level
+      let headingLevel = 0;
+      const pPr      = node.getElementsByTagNameNS(W, 'pPr')[0];
+      if (pPr) {
+        const pStyle = pPr.getElementsByTagNameNS(W, 'pStyle')[0];
+        if (pStyle) {
+          const sv = pStyle.getAttributeNS(W, 'val') || '';
+          const m  = sv.match(/[Hh]eading\s*(\d)/);
+          if (m) headingLevel = parseInt(m[1]);
+          // some locales use Title / Subtitle
+          else if (/^[Tt]itle$/i.test(sv)) headingLevel = 1;
+        }
+        // fallback: outline level (0=H1, 1=H2, 2=H3…)
+        if (!headingLevel) {
+          const ol = pPr.getElementsByTagNameNS(W, 'outlineLvl')[0];
+          if (ol) {
+            const lv = parseInt(ol.getAttributeNS(W, 'val'));
+            if (!isNaN(lv) && lv <= 5) headingLevel = lv + 1;
+          }
+        }
+      }
+      items.push({ text: text.trim(), isEmpty: !text.trim(), isTable: false, headingLevel });
     } else if (node.localName === 'tbl') {
       const firstText = Array.from(node.getElementsByTagNameNS(W,'t')).slice(0,6).map(t=>t.textContent).join(' ').trim();
-      items.push({ text: firstText ? '[Table: '+firstText.slice(0,60)+'…]' : '[Table]', isEmpty: false, isTable: true });
+      items.push({ text: firstText ? '[Table: '+firstText.slice(0,60)+'…]' : '[Table]', isEmpty: false, isTable: true, headingLevel: 0 });
     }
   }
   return items;
@@ -430,7 +454,13 @@ function renderDocView() {
 
 function makeParaEl(para) {
   const el = document.createElement('div');
-  el.className = 'para-item' + (para.isEmpty ? ' empty' : para.isTable ? ' tbl-placeholder' : '');
+  let cls = 'para-item';
+  if      (para.isEmpty)  cls += ' empty';
+  else if (para.isTable)  cls += ' tbl-placeholder';
+  else if (para.headingLevel === 1) cls += ' h1';
+  else if (para.headingLevel === 2) cls += ' h2';
+  else if (para.headingLevel >= 3) cls += ' h3';
+  el.className = cls;
   if (!para.isEmpty) el.textContent = para.text;
   return el;
 }
@@ -488,8 +518,8 @@ function blockCardHTML(block, n) {
   const hasFrame = block.imgKey && blockImgs[block.imgKey];
   const refs     = block.refs || [];
   const motion   = block.motion || '';
-  const effRatio = block.aspectOverride ? (block.aspectRatio || '16:9') : '16:9';
-  const effBase  = block.aspectOverride ? (block.basePx || 1080) : 1080;
+  const effRatio = block.aspectRatio || '16:9';
+  const effBase  = block.basePx || 1080;
 
   // Motion options
   const motionOpts = `<option value="">— None —</option>${MOTIONS.map(m =>
@@ -576,19 +606,12 @@ function blockCardHTML(block, n) {
           <input type="file" id="ref-fi-${id}" accept="image/*" multiple style="display:none">
         </div>
         <div class="bf bf-full">
-          <div class="override-wrap">
-            <label class="override-check-row">
-              <input type="checkbox" ${block.aspectOverride ? 'checked' : ''} onchange="_toggleOverride('${id}',this.checked)">
-              <span>Override aspect &amp; resolution</span>
-            </label>
-            ${block.aspectOverride ? `
-            <div class="override-fields">
-              <select onchange="_updRatio('${id}',this.value)">${ratioOptions(effRatio)}</select>
-              <input type="number" min="360" max="4320" step="120" value="${effBase}" placeholder="Base px" onchange="_updBasePx('${id}',this.value)">
-            </div>
-            <div class="override-res-badge">${res.str} &nbsp;<strong>${res.badge}</strong></div>
-            ` : ''}
+          <label>Aspect &amp; Resolution</label>
+          <div class="override-fields">
+            <select onchange="_updRatio('${id}',this.value)">${ratioOptions(effRatio)}</select>
+            <input type="number" min="360" max="4320" step="120" value="${effBase}" placeholder="Base px" onchange="_updBasePx('${id}',this.value)">
           </div>
+          <div class="override-res-badge">${res.str} &nbsp;<strong>${res.badge}</strong></div>
         </div>
       </div>
     </div>
@@ -614,15 +637,6 @@ function _delBlock(id) {
   renderDocView();
 }
 
-function _toggleOverride(id, on) {
-  const b = docBlocks.find(b => b._id === id);
-  if (!b) return;
-  b.aspectOverride = on;
-  if (on && !b.aspectRatio) b.aspectRatio = '16:9';
-  if (on && !b.basePx)      b.basePx = 1080;
-  rerenderBlock(id);
-}
-
 function _updRatio(id, val) {
   const b = docBlocks.find(b => b._id === id);
   if (b) { b.aspectRatio = val; rerenderBlock(id); }
@@ -635,7 +649,7 @@ function _updBasePx(id, val) {
 
 function addBlock(afterIdx) {
   const block = { afterIdx, type: 'Still', description: '', motion: '', motionCustom: '',
-    aspectOverride: false, aspectRatio: '16:9', basePx: 1080,
+    aspectRatio: '16:9', basePx: 1080,
     imgKey: null, frameName: null, refs: [], _id: uid() };
   docBlocks.push(block);
   renderDocView();
@@ -709,7 +723,7 @@ function _deleteRef(id, ri) {
 function openSketch(id) {
   sketchBlockId = id;
   const b = docBlocks.find(b => b._id === id);
-  const ratio = b && b.aspectOverride ? (b.aspectRatio || '16:9') : '16:9';
+  const ratio = (b && b.aspectRatio) ? b.aspectRatio : '16:9';
   const r     = RATIO_DEFS[ratio] || RATIO_DEFS['16:9'];
   const cw    = SKETCH_W, ch = Math.round(SKETCH_W * r.h / r.w);
   const canvas = document.getElementById('sketch-canvas');
@@ -1075,8 +1089,8 @@ function buildHighsfieldProject(blocks, projectName) {
     const refs     = (block.refs || []);
     const urlRefs  = refs.filter(r => r.type === 'url').map(r => r.value);
     const imgRefs  = refs.filter(r => r.type === 'img' && blockImgs[r.value]);
-    const effRatio = block.aspectOverride ? (block.aspectRatio || '16:9') : '16:9';
-    const effBase  = block.aspectOverride ? (block.basePx  || 1080)  : 1080;
+    const effRatio = block.aspectRatio || '16:9';
+    const effBase  = block.basePx  || 1080;
     const hfRes    = _hfResolution(effBase);
     const hfVidRes = _vidResolution(effBase);
 
@@ -1186,8 +1200,8 @@ function buildKreaProject(blocks, projectName) {
     const refs     = (block.refs || []);
     const urlRefs  = refs.filter(r => r.type === 'url').map(r => r.value);
     const imgRefs  = refs.filter(r => r.type === 'img' && blockImgs[r.value]);
-    const effRatio = block.aspectOverride ? (block.aspectRatio || '1:1') : '1:1';
-    const effBase  = block.aspectOverride ? (block.basePx  || 1024) : 1024;
+    const effRatio = block.aspectRatio || '16:9';
+    const effBase  = block.basePx  || 1080;
     const kreaDims = _kreaDims(effRatio, effBase);
 
     // Sticky note
