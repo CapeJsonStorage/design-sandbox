@@ -24,93 +24,126 @@
     background: var(--bg);
     color: var(--text);
   }
-  body { padding: 36px 32px; overflow-y: auto; }
+  body { padding: 32px 28px; overflow-y: auto; }
 
-  .top { margin-bottom: 32px; }
+  /* ── Header ── */
+  .top { margin-bottom: 28px; }
   .top h1 { font-size: 22px; font-weight: 700; letter-spacing: -.4px; }
-  .top p { font-size: 13px; color: var(--text-muted); margin-top: 5px; }
+  .top p  { font-size: 13px; color: var(--text-muted); margin-top: 5px; }
 
+  /* ── Grid: fixed 3-up on wide, 2-up on medium, 1-up on narrow ── */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
   }
 
-  .link-card {
+  /* ── Tool card ── */
+  .tool-card {
     display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 16px 18px;
-    background: var(--card);
+    flex-direction: column;
     border: 1px solid var(--card-border);
     border-radius: 12px;
+    overflow: hidden;
     text-decoration: none;
     color: var(--text);
-    transition: background .15s, border-color .15s, transform .1s;
+    background: var(--card);
+    transition: border-color .15s, transform .12s, box-shadow .15s;
+    cursor: pointer;
   }
-  .link-card:hover {
-    background: var(--card-hover);
+  .tool-card:hover {
     border-color: var(--orange);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(249,115,22,.12);
   }
 
-  .link-icon {
-    width: 40px; height: 40px; flex-shrink: 0;
-    border-radius: 10px;
+  /* ── Thumbnail ── */
+  .tool-thumb-wrap {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: #111115;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .tool-thumb-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .3s ease;
+  }
+  .tool-card:hover .tool-thumb-wrap img {
+    transform: scale(1.03);
+  }
+
+  /* ── Footer strip ── */
+  .tool-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 16px;
+    border-top: 1px solid var(--card-border);
+    background: var(--card);
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .tool-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tool-arrow {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
     background: var(--orange-bg);
-    border: 1px solid var(--orange-dim);
-    display: flex; align-items: center; justify-content: center;
     color: var(--orange);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background .12s, border-color .12s;
   }
-
-  .link-body { min-width: 0; }
-  .link-name {
-    font-size: 14px; font-weight: 600;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  .tool-card:hover .tool-arrow {
+    background: var(--orange-dim);
+    border-color: var(--orange);
   }
-  .link-url {
-    font-size: 11px; color: var(--text-dim);
-    margin-top: 2px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    font-family: monospace;
-  }
-
-  .link-arrow { margin-left: auto; color: var(--text-dim); flex-shrink: 0; transition: color .15s; }
-  .link-card:hover .link-arrow { color: var(--orange); }
 </style>
 </head>
 <body>
 
 <div class="top">
   <h1>Higgsfield Tools</h1>
-  <p>Node templates — click to open in Higgsfield</p>
+  <p>Node templates — click any tile to open in Higgsfield</p>
 </div>
 
 <div class="grid" id="grid"></div>
 
 <script>
 const tools = [
-  { name: 'Character Creator',      url: 'https://higgsfield.ai/s/arkafNNvNwI' },
-  { name: 'Image from Moodboard',   url: 'https://higgsfield.ai/s/ZbpWaS2Y1k4' },
-  { name: 'Shot Creator',           url: 'https://higgsfield.ai/s/sbxeY9WvoX8' },
-  { name: 'Docx to Prompts',        url: 'https://higgsfield.ai/s/YvYRGfuo88U' },
-  { name: 'Test Models',            url: 'https://higgsfield.ai/s/tqB0RUtIz2Q' },
-  { name: 'Video Sequence from Elements', url: 'https://higgsfield.ai/s/QyU0k2W2GUU' },
-  { name: 'Angles from Image',           url: 'https://higgsfield.ai/s/OmEIKNJ4CDA' },
-  { name: 'Variations from Image',       url: 'https://higgsfield.ai/s/OEptE3RoqwY' },
+  { name: 'Character Creator',            url: 'https://higgsfield.ai/s/arkafNNvNwI', thumb: 'Chararcter_Creator_Thumb_v01.png' },
+  { name: 'Image from Moodboard',         url: 'https://higgsfield.ai/s/ZbpWaS2Y1k4', thumb: 'Image from Moodboard_Thumb_v01.png' },
+  { name: 'Shot Creator',                 url: 'https://higgsfield.ai/s/sbxeY9WvoX8', thumb: 'Shot Creator_Thumb_v01.png' },
+  { name: 'Docx to Prompts',              url: 'https://higgsfield.ai/s/YvYRGfuo88U', thumb: 'Docx to prompts_Thumb_v01.png' },
+  { name: 'Test Models',                  url: 'https://higgsfield.ai/s/tqB0RUtIz2Q', thumb: 'Test Models_Thumb_v01.png' },
+  { name: 'Video Sequence from Elements', url: 'https://higgsfield.ai/s/QyU0k2W2GUU', thumb: 'Video Sequence from ELements_Thumb_v01.png' },
+  { name: 'Angles from Image',            url: 'https://higgsfield.ai/s/OmEIKNJ4CDA', thumb: 'Angles from image_Thumb_v01.png' },
+  { name: 'Variations from Image',        url: 'https://higgsfield.ai/s/OEptE3RoqwY', thumb: 'Variations from Image_Thumb_v01.png' },
 ];
 
-const iconSVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>`;
-const arrowSVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+const arrowSVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
 
 document.getElementById('grid').innerHTML = tools.map(t => `
-  <a class="link-card" href="${t.url}" target="_blank" rel="noopener">
-    <div class="link-icon">${iconSVG}</div>
-    <div class="link-body">
-      <div class="link-name">${t.name}</div>
-      <div class="link-url">${t.url}</div>
+  <a class="tool-card" href="${t.url}" target="_blank" rel="noopener">
+    <div class="tool-thumb-wrap">
+      <img src="/thumbnails/${encodeURIComponent(t.thumb)}" alt="${t.name}" loading="lazy">
     </div>
-    <span class="link-arrow">${arrowSVG}</span>
+    <div class="tool-footer">
+      <span class="tool-name">${t.name}</span>
+      <span class="tool-arrow">${arrowSVG}</span>
+    </div>
   </a>`).join('');
 </script>
 </body>
