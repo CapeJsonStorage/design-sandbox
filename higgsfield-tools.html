@@ -16,16 +16,16 @@
   html, body {
     height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: var(--bg); color: var(--text);
+    overflow: hidden; display: flex; flex-direction: column;
   }
-  body { overflow-y: auto; }
 
   /* ── Top bar ── */
   .topbar {
-    position: sticky; top: 0; z-index: 10;
-    padding: 18px 24px 14px;
+    flex-shrink: 0;
+    padding: 14px 20px 12px;
     background: rgba(15,15,17,.96); backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--card-border);
-    display: flex; align-items: flex-end; justify-content: space-between; gap: 12px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
   }
   .topbar-left h1 { font-size: 20px; font-weight: 700; letter-spacing: -.4px; }
   .topbar-left p  { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
@@ -39,16 +39,19 @@
   }
   .btn-add:hover { background: var(--orange-dim); border-color: var(--orange); }
 
-  /* ── Grid — fixed 4 columns ── */
-  .grid-wrap { padding: 20px 24px 60px; }
+  /* ── Grid — fixed 4 columns, fills remaining viewport ── */
+  .grid-wrap {
+    flex: 1; overflow-y: auto;
+    padding: 16px 20px;
+  }
   .grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
+    gap: 10px;
   }
-  @media (max-width: 1100px) { .grid { grid-template-columns: repeat(3, 1fr); } }
-  @media (max-width: 750px)  { .grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 480px)  { .grid { grid-template-columns: 1fr; } }
+  @media (max-width: 1000px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 680px)  { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 420px)  { .grid { grid-template-columns: 1fr; } }
 
   /* ── Section divider ── */
   .section-label {
@@ -71,7 +74,7 @@
     box-shadow: 0 6px 24px rgba(249,115,22,.12);
   }
   .tool-thumb-wrap {
-    width: 100%; aspect-ratio: 16/9; overflow: hidden;
+    width: 100%; height: 140px; overflow: hidden;
     background: #111115; flex-shrink: 0;
   }
   .tool-thumb-wrap img {
@@ -112,7 +115,7 @@
     border-radius: 10px; border: 1px solid var(--card-border);
     background: var(--card); overflow: hidden;
   }
-  .skeleton-thumb { width: 100%; aspect-ratio: 16/9; background: var(--surface2); animation: pulse 1.4s ease-in-out infinite; }
+  .skeleton-thumb { width: 100%; height: 140px; background: var(--surface2); animation: pulse 1.4s ease-in-out infinite; }
   .skeleton-foot  { height: 44px; padding: 0 12px; display: flex; align-items: center; border-top: 1px solid var(--card-border); }
   .skeleton-line  { height: 10px; border-radius: 4px; background: var(--surface2); width: 55%; animation: pulse 1.4s ease-in-out infinite; }
   @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.9} }
