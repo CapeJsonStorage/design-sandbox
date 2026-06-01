@@ -103,6 +103,44 @@ app.delete('/api/projects/:id', requireAuth, async (req, res) => {
   }
 });
 
+// ── HF Tools routes ───────────────────────────────────────
+app.get('/api/hf-tools', requireAuth, async (_req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, name, url, thumb, created_at FROM hf_tools ORDER BY created_at ASC'
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error('GET /api/hf-tools error', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/api/hf-tools', requireAuth, async (req, res) => {
+  try {
+    const { name, url, thumb } = req.body;
+    if (!name || !url) return res.status(400).json({ error: 'name and url required' });
+    const { rows } = await pool.query(
+      'INSERT INTO hf_tools (name, url, thumb) VALUES ($1, $2, $3) RETURNING id, created_at',
+      [name, url, thumb || '']
+    );
+    res.json({ ok: true, id: rows[0].id, created_at: rows[0].created_at });
+  } catch (err) {
+    console.error('POST /api/hf-tools error', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.delete('/api/hf-tools/:id', requireAuth, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM hf_tools WHERE id = $1', [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('DELETE /api/hf-tools/:id error', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // ── Static files ──────────────────────────────────────────
 app.use(express.static(path.join(__dirname)));
 app.get('*', (_req, res) => res.sendFile(path.join(__dirname, 'index.html')));
