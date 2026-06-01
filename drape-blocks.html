@@ -365,7 +365,7 @@ dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('over
 fi.addEventListener('change', () => handleFile(fi.files[0]));
 
 // ── File handling ─────────────────────────────────────────────────
-async function handleFile(file) {
+async function handleFile(file, restoredBlocks = null, restoredBlockImgs = null) {
   if (!file) return;
   if (!file.name.endsWith('.docx')) { showErr('Please upload a .docx file.'); return; }
   hideErr();
@@ -375,8 +375,8 @@ async function handleFile(file) {
     if (!xmlFile) { showErr('Could not read document.xml from this file.'); return; }
     docXmlStr = await xmlFile.async('string');
     docParas  = parseParas(docXmlStr);
-    docBlocks = [];
-    blockImgs = {};
+    docBlocks = restoredBlocks    || [];
+    blockImgs = restoredBlockImgs || {};
     docName   = file.name.replace(/\.docx$/i, '');
     document.getElementById('upload-area').style.display = 'none';
     document.getElementById('doc-view').style.display   = 'block';
@@ -1045,18 +1045,39 @@ async function downloadImages() {
 }
 
 // ── .docx save/load ───────────────────────────────────────────────
+
+// Serialize the original docZip (not the modified export) to base64
+async function _docZipToBase64() {
+  const blob = await docZip.generateAsync({
+    type: 'blob',
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  });
+  return new Promise((res, rej) => {
+    const fr = new FileReader(); fr.readAsDataURL(blob);
+    fr.onload = () => res(fr.result.split(',')[1]);
+    fr.onerror = rej;
+  });
+}
+
+// Save bundle: original docx + blocks + blockImgs (so the project fully restores on reopen)
 async function saveProject() {
   if (!docZip) return;
   const btn = document.querySelector('.btn[onclick="saveProject()"]');
   const orig = btn?.innerHTML;
   if (btn) { btn.disabled = true; btn.textContent = '…'; }
   try {
-    const base64 = await docxToBase64();
-    window.parent.postMessage({ type: 'save-project', source: 'drapeblocks', fileType: '.docx', name: docName, data: base64 }, '*');
+    const docxBase64 = await _docZipToBase64();
+    const bundle = JSON.stringify({ version: 2, docxBase64, docName, blocks: docBlocks, blockImgs });
+    const bundleBase64 = btoa(unescape(encodeURIComponent(bundle)));
+    window.parent.postMessage({
+      type: 'save-project', source: 'drapeblocks',
+      fileType: '.drapeblocks', name: docName, data: bundleBase64
+    }, '*');
     if (btn) { btn.textContent = '✓ Saved!'; setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; }, 1800); }
   } catch(e) { showErr('Save failed: ' + e.message); if (btn) { btn.innerHTML = orig; btn.disabled = false; } }
 }
 
+// Local download still exports the modified .docx (with DESIGN paragraphs embedded)
 async function saveLocally() {
   if (!docZip) return;
   try {
@@ -1374,11 +1395,32 @@ function saveKreaProject() {
 window.addEventListener('message', async e => {
   if (e.data?.type !== 'load-project' || !e.data.data) return;
   try {
-    const bytes = atob(e.data.data);
-    const arr = new Uint8Array(bytes.length);
-    for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+    const decoded = atob(e.data.data);
+
+    // ── Bundle format (version 2): JSON starting with '{' ──
+    if (decoded[0] === '{') {
+      const bundle = JSON.parse(decoded);
+      if (bundle.version === 2 && bundle.docxBase64) {
+        const name    = bundle.docName || (e.data.name || 'document').replace(/\.drapeblocks$/i, '');
+        const docxBin = atob(bundle.docxBase64);
+        const arr     = new Uint8Array(docxBin.length);
+        for (let i = 0; i < docxBin.length; i++) arr[i] = docxBin.charCodeAt(i);
+        const file = new File([arr], name + '.docx', {
+          type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        });
+        docName = name;
+        await handleFile(file, bundle.blocks || [], bundle.blockImgs || {});
+        return;
+      }
+    }
+
+    // ── Legacy format: raw docx bytes ──
+    const arr = new Uint8Array(decoded.length);
+    for (let i = 0; i < decoded.length; i++) arr[i] = decoded.charCodeAt(i);
     const name = (e.data.name || 'document').replace(/\.docx$/i, '');
-    const file = new File([arr], name + '.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const file = new File([arr], name + '.docx', {
+      type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    });
     docName = name;
     await handleFile(file);
   } catch(err) { showErr('Failed to load project: ' + err.message); }

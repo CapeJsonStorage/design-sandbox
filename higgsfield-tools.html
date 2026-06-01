@@ -7,31 +7,40 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #0f0f11;
-    --card: #1a1a1f;
-    --card-border: #27272f;
-    --card-hover: #202028;
-    --text: #f0f0f4;
-    --text-muted: #888;
-    --text-dim: #444;
-    --orange: #f97316;
-    --orange-bg: #271a0c;
-    --orange-dim: #3d2510;
+    --bg: #0f0f11; --card: #1a1a1f; --card-border: #27272f; --card-hover: #202028;
+    --text: #f0f0f4; --text-muted: #888; --text-faint: #444;
+    --orange: #f97316; --orange-bg: #271a0c; --orange-dim: #3d2510;
+    --surface2: #141418; --border-strong: #3d3d4a;
+    --danger: #ef4444; --radius: 8px;
   }
   html, body {
-    height: 100%;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text);
   }
-  body { padding: 32px 28px; overflow-y: auto; }
+  body { overflow-y: auto; }
 
-  /* ── Header ── */
-  .top { margin-bottom: 28px; }
-  .top h1 { font-size: 22px; font-weight: 700; letter-spacing: -.4px; }
-  .top p  { font-size: 13px; color: var(--text-muted); margin-top: 5px; }
+  /* ── Top bar ── */
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    padding: 20px 28px 16px;
+    background: rgba(15,15,17,.96); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--card-border);
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 12px;
+  }
+  .topbar-left h1 { font-size: 20px; font-weight: 700; letter-spacing: -.4px; }
+  .topbar-left p  { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .btn-add {
+    height: 34px; padding: 0 16px;
+    background: var(--orange-bg); color: var(--orange);
+    border: 1px solid rgba(249,115,22,.35); border-radius: var(--radius);
+    font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; gap: 7px; white-space: nowrap;
+    transition: background .12s, border-color .12s; flex-shrink: 0;
+  }
+  .btn-add:hover { background: var(--orange-dim); border-color: var(--orange); }
 
-  /* ── Grid: fixed 3-up on wide, 2-up on medium, 1-up on narrow ── */
+  /* ── Grid ── */
+  .grid-wrap { padding: 24px 28px 60px; }
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -40,111 +49,304 @@
 
   /* ── Tool card ── */
   .tool-card {
-    display: flex;
-    flex-direction: column;
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
-    overflow: hidden;
-    text-decoration: none;
-    color: var(--text);
-    background: var(--card);
+    display: flex; flex-direction: column;
+    border: 1px solid var(--card-border); border-radius: 12px;
+    overflow: hidden; text-decoration: none; color: var(--text);
+    background: var(--card); position: relative;
     transition: border-color .15s, transform .12s, box-shadow .15s;
-    cursor: pointer;
   }
   .tool-card:hover {
-    border-color: var(--orange);
-    transform: translateY(-2px);
+    border-color: var(--orange); transform: translateY(-2px);
     box-shadow: 0 8px 32px rgba(249,115,22,.12);
   }
-
-  /* ── Thumbnail ── */
   .tool-thumb-wrap {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    overflow: hidden;
-    background: #111115;
-    position: relative;
-    flex-shrink: 0;
+    width: 100%; aspect-ratio: 16/9; overflow: hidden;
+    background: #111115; flex-shrink: 0;
   }
   .tool-thumb-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+    width: 100%; height: 100%; object-fit: cover; display: block;
     transition: transform .3s ease;
   }
-  .tool-card:hover .tool-thumb-wrap img {
-    transform: scale(1.03);
-  }
-
-  /* ── Footer strip ── */
-  .tool-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 13px 16px;
-    border-top: 1px solid var(--card-border);
-    background: var(--card);
-    gap: 10px;
-    flex-shrink: 0;
-  }
-  .tool-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .tool-arrow {
-    width: 30px; height: 30px;
-    border-radius: 8px;
-    border: 1px solid var(--card-border);
-    background: var(--orange-bg);
-    color: var(--orange);
+  .tool-card:hover .tool-thumb-wrap img { transform: scale(1.03); }
+  .tool-thumb-placeholder {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #1c1d3a 0%, #271a0c 100%);
     display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
+    color: var(--text-faint); font-size: 32px;
+  }
+  .tool-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 16px; border-top: 1px solid var(--card-border);
+    gap: 10px; flex-shrink: 0;
+  }
+  .tool-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tool-footer-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .tool-arrow {
+    width: 30px; height: 30px; border-radius: 7px;
+    border: 1px solid var(--card-border); background: var(--orange-bg);
+    color: var(--orange); display: flex; align-items: center; justify-content: center;
     transition: background .12s, border-color .12s;
   }
-  .tool-card:hover .tool-arrow {
-    background: var(--orange-dim);
-    border-color: var(--orange);
+  .tool-card:hover .tool-arrow { background: var(--orange-dim); border-color: var(--orange); }
+  /* Delete button — only visible on custom cards */
+  .tool-del {
+    width: 26px; height: 26px; border-radius: 6px;
+    border: 1px solid transparent; background: none;
+    color: var(--text-faint); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .1s; flex-shrink: 0;
+    font-size: 13px; line-height: 1;
   }
+  .tool-del:hover { color: var(--danger); border-color: rgba(239,68,68,.3); background: rgba(239,68,68,.08); }
+
+  /* ── Section label ── */
+  .section-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--text-faint); margin: 20px 0 10px;
+  }
+  .section-label:first-child { margin-top: 0; }
+
+  /* ── Add Tool modal overlay ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.75);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal {
+    background: var(--card); border: 1px solid var(--border-strong);
+    border-radius: 14px; padding: 28px 28px 24px;
+    width: 420px; max-width: calc(100vw - 32px);
+    box-shadow: 0 24px 80px rgba(0,0,0,.6);
+  }
+  .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+  .field label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
+  .field input[type=text] {
+    padding: 8px 10px; background: var(--surface2); border: 1px solid var(--card-border);
+    border-radius: var(--radius); color: var(--text); font-family: inherit; font-size: 13px; outline: none;
+    transition: border-color .12s;
+  }
+  .field input[type=text]:focus { border-color: var(--orange); }
+  .field input[type=text]::placeholder { color: var(--text-faint); }
+  .thumb-upload-row {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-upload-thumb {
+    height: 32px; padding: 0 12px; background: var(--surface2); border: 1px solid var(--card-border);
+    border-radius: var(--radius); color: var(--text-muted); font-size: 12px; font-weight: 500;
+    cursor: pointer; font-family: inherit; white-space: nowrap; flex-shrink: 0;
+    transition: all .1s;
+  }
+  .btn-upload-thumb:hover { background: var(--card-border); color: var(--text); }
+  .thumb-filename { font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .thumb-preview-wrap {
+    margin-top: 8px; width: 100%; aspect-ratio: 16/9;
+    background: var(--surface2); border: 1px solid var(--card-border);
+    border-radius: var(--radius); overflow: hidden; display: none;
+  }
+  .thumb-preview-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .modal-btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+  .btn-cancel {
+    height: 34px; padding: 0 16px; background: var(--surface2); border: 1px solid var(--card-border);
+    border-radius: var(--radius); color: var(--text-muted); font-size: 13px; font-weight: 500;
+    cursor: pointer; font-family: inherit; transition: all .1s;
+  }
+  .btn-cancel:hover { background: var(--card-border); color: var(--text); }
+  .btn-save {
+    height: 34px; padding: 0 18px; background: var(--orange-bg); border: 1px solid rgba(249,115,22,.35);
+    border-radius: var(--radius); color: var(--orange); font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: all .1s;
+  }
+  .btn-save:hover { background: var(--orange-dim); border-color: var(--orange); }
+  .modal-err { font-size: 12px; color: #fca5a5; margin-top: 10px; display: none; }
 </style>
 </head>
 <body>
 
-<div class="top">
-  <h1>Higgsfield Tools</h1>
-  <p>Node templates — click any tile to open in Higgsfield</p>
+<div class="topbar">
+  <div class="topbar-left">
+    <h1>Higgsfield Tools</h1>
+    <p>Node templates — click any tile to open in Higgsfield</p>
+  </div>
+  <button class="btn-add" onclick="openAddModal()">
+    <svg width="13" height="13" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg>
+    Add Tool
+  </button>
 </div>
 
-<div class="grid" id="grid"></div>
+<div class="grid-wrap">
+  <div id="grid"></div>
+</div>
+
+<!-- ── Add Tool modal ── -->
+<div class="modal-overlay" id="modal-overlay" style="display:none" onclick="_overlayClick(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">Add Tool</div>
+    <div class="field">
+      <label>Tool name</label>
+      <input type="text" id="at-name" placeholder="e.g. Style Transfer">
+    </div>
+    <div class="field">
+      <label>Higgsfield URL</label>
+      <input type="text" id="at-url" placeholder="https://higgsfield.ai/s/…">
+    </div>
+    <div class="field">
+      <label>Thumbnail <span style="text-transform:none;font-weight:400;color:var(--text-faint)">(optional)</span></label>
+      <div class="thumb-upload-row">
+        <button class="btn-upload-thumb" onclick="document.getElementById('at-thumb-fi').click()">Upload image</button>
+        <span class="thumb-filename" id="at-thumb-name">No file chosen</span>
+      </div>
+      <div class="thumb-preview-wrap" id="at-preview-wrap">
+        <img id="at-preview-img" src="" alt="preview">
+      </div>
+      <input type="file" id="at-thumb-fi" accept="image/*" style="display:none" onchange="handleThumbFile(event)">
+    </div>
+    <div class="modal-err" id="at-err"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeAddModal()">Cancel</button>
+      <button class="btn-save"   onclick="submitAddTool()">Add Tool</button>
+    </div>
+  </div>
+</div>
 
 <script>
-const tools = [
-  { name: 'Character Creator',            url: 'https://higgsfield.ai/s/arkafNNvNwI', thumb: 'Chararcter_Creator_Thumb_v01.png' },
-  { name: 'Image from Moodboard',         url: 'https://higgsfield.ai/s/ZbpWaS2Y1k4', thumb: 'Image from Moodboard_Thumb_v01.png' },
-  { name: 'Shot Creator',                 url: 'https://higgsfield.ai/s/sbxeY9WvoX8', thumb: 'Shot Creator_Thumb_v01.png' },
-  { name: 'Docx to Prompts',              url: 'https://higgsfield.ai/s/YvYRGfuo88U', thumb: 'Docx to prompts_Thumb_v01.png' },
-  { name: 'Test Models',                  url: 'https://higgsfield.ai/s/tqB0RUtIz2Q', thumb: 'Test Models_Thumb_v01.png' },
-  { name: 'Video Sequence from Elements', url: 'https://higgsfield.ai/s/QyU0k2W2GUU', thumb: 'Video Sequence from ELements_Thumb_v01.png' },
-  { name: 'Angles from Image',            url: 'https://higgsfield.ai/s/OmEIKNJ4CDA', thumb: 'Angles from image_Thumb_v01.png' },
-  { name: 'Variations from Image',        url: 'https://higgsfield.ai/s/OEptE3RoqwY', thumb: 'Variations from Image_Thumb_v01.png' },
+const STORAGE_KEY   = 'hfCustomTools_v1';
+const ARROW_SVG     = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+const DEL_SVG       = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>`;
+
+// Default tools (hardcoded, cannot be deleted)
+const DEFAULT_TOOLS = [
+  { name: 'Character Creator',            url: 'https://higgsfield.ai/s/arkafNNvNwI', thumb: '/thumbnails/Chararcter_Creator_Thumb_v01.png' },
+  { name: 'Image from Moodboard',         url: 'https://higgsfield.ai/s/ZbpWaS2Y1k4', thumb: '/thumbnails/Image from Moodboard_Thumb_v01.png' },
+  { name: 'Shot Creator',                 url: 'https://higgsfield.ai/s/sbxeY9WvoX8', thumb: '/thumbnails/Shot Creator_Thumb_v01.png' },
+  { name: 'Docx to Prompts',              url: 'https://higgsfield.ai/s/YvYRGfuo88U', thumb: '/thumbnails/Docx to prompts_Thumb_v01.png' },
+  { name: 'Test Models',                  url: 'https://higgsfield.ai/s/tqB0RUtIz2Q', thumb: '/thumbnails/Test Models_Thumb_v01.png' },
+  { name: 'Video Sequence from Elements', url: 'https://higgsfield.ai/s/QyU0k2W2GUU', thumb: '/thumbnails/Video Sequence from ELements_Thumb_v01.png' },
+  { name: 'Angles from Image',            url: 'https://higgsfield.ai/s/OmEIKNJ4CDA', thumb: '/thumbnails/Angles from image_Thumb_v01.png' },
+  { name: 'Variations from Image',        url: 'https://higgsfield.ai/s/OEptE3RoqwY', thumb: '/thumbnails/Variations from Image_Thumb_v01.png' },
 ];
 
-const arrowSVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+// ── Custom tools persistence ──────────────────────────────────────
+function loadCustomTools() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { return []; }
+}
+function saveCustomTools(arr) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); } catch(e) {
+    console.warn('localStorage full:', e);
+  }
+}
 
-document.getElementById('grid').innerHTML = tools.map(t => `
-  <a class="tool-card" href="${t.url}" target="_blank" rel="noopener">
-    <div class="tool-thumb-wrap">
-      <img src="/thumbnails/${encodeURIComponent(t.thumb)}" alt="${t.name}" loading="lazy">
-    </div>
-    <div class="tool-footer">
-      <span class="tool-name">${t.name}</span>
-      <span class="tool-arrow">${arrowSVG}</span>
-    </div>
-  </a>`).join('');
+// ── Render ────────────────────────────────────────────────────────
+function cardHTML(t, isCustom) {
+  const thumbContent = t.thumb
+    ? `<img src="${t.thumb.startsWith('data:') ? t.thumb : encodeURI(t.thumb)}" alt="${t.name}" loading="lazy">`
+    : `<div class="tool-thumb-placeholder">⚙</div>`;
+  const delBtn = isCustom
+    ? `<button class="tool-del" onclick="_deleteTool(event,'${encodeURIComponent(t.name)}')" title="Remove">${DEL_SVG}</button>`
+    : '';
+  return `
+    <a class="tool-card" href="${t.url}" target="_blank" rel="noopener">
+      <div class="tool-thumb-wrap">${thumbContent}</div>
+      <div class="tool-footer">
+        <span class="tool-name">${t.name}</span>
+        <span class="tool-footer-right">
+          ${delBtn}
+          <span class="tool-arrow">${ARROW_SVG}</span>
+        </span>
+      </div>
+    </a>`;
+}
+
+function render() {
+  const custom = loadCustomTools();
+  const grid   = document.getElementById('grid');
+  let html = '';
+
+  html += DEFAULT_TOOLS.map(t => cardHTML(t, false)).join('');
+
+  if (custom.length) {
+    html += `<div class="section-label" style="grid-column:1/-1;margin-top:24px">Custom tools</div>`;
+    html += custom.map(t => cardHTML(t, true)).join('');
+  }
+  grid.innerHTML = html;
+}
+
+render();
+
+// ── Delete custom tool ────────────────────────────────────────────
+function _deleteTool(e, encodedName) {
+  e.preventDefault(); e.stopPropagation();
+  const name = decodeURIComponent(encodedName);
+  const custom = loadCustomTools().filter(t => t.name !== name);
+  saveCustomTools(custom);
+  render();
+}
+
+// ── Add modal ─────────────────────────────────────────────────────
+let _pendingThumb = ''; // dataURL of chosen thumbnail
+
+function openAddModal() {
+  _pendingThumb = '';
+  document.getElementById('at-name').value  = '';
+  document.getElementById('at-url').value   = '';
+  document.getElementById('at-thumb-name').textContent = 'No file chosen';
+  document.getElementById('at-preview-wrap').style.display = 'none';
+  document.getElementById('at-thumb-fi').value = '';
+  document.getElementById('at-err').style.display = 'none';
+  document.getElementById('modal-overlay').style.display = 'flex';
+  setTimeout(() => document.getElementById('at-name').focus(), 50);
+}
+
+function closeAddModal() {
+  document.getElementById('modal-overlay').style.display = 'none';
+}
+
+function _overlayClick(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeAddModal();
+}
+
+function handleThumbFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  document.getElementById('at-thumb-name').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    _pendingThumb = ev.target.result;
+    document.getElementById('at-preview-img').src = _pendingThumb;
+    document.getElementById('at-preview-wrap').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function submitAddTool() {
+  const name = document.getElementById('at-name').value.trim();
+  const url  = document.getElementById('at-url').value.trim();
+  const err  = document.getElementById('at-err');
+
+  if (!name) { showModalErr('Please enter a tool name.'); return; }
+  if (!url)  { showModalErr('Please enter a Higgsfield URL.'); return; }
+  if (!url.startsWith('http')) { showModalErr('URL must start with http:// or https://'); return; }
+
+  const custom = loadCustomTools();
+  if (custom.some(t => t.name === name)) {
+    showModalErr('A tool with this name already exists.'); return;
+  }
+
+  custom.push({ name, url, thumb: _pendingThumb });
+  saveCustomTools(custom);
+  closeAddModal();
+  render();
+}
+
+function showModalErr(msg) {
+  const el = document.getElementById('at-err');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+// Allow Enter key in inputs to submit
+document.getElementById('at-name').addEventListener('keydown', e => { if(e.key==='Enter') submitAddTool(); });
+document.getElementById('at-url').addEventListener('keydown',  e => { if(e.key==='Enter') submitAddTool(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeAddModal(); });
 </script>
 </body>
 </html>
